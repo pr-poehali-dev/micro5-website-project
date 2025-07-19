@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -97,5 +99,61 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family:
+      "Montserrat",
+      system-ui,
+      -apple-system,
+      sans-serif;
+  }
+
+  /* 3D эффекты и анимации */
+  .card-3d {
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease;
+  }
+
+  .card-3d:hover {
+    transform: rotateY(5deg) rotateX(5deg);
+  }
+
+  .parallax-bg {
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  /* Анимированные градиенты */
+  .gradient-move {
+    background: linear-gradient(-45deg, #2563eb, #10b981, #8b5cf6, #f59e0b);
+    background-size: 400% 400%;
+    animation: gradientMove 4s ease infinite;
+  }
+
+  @keyframes gradientMove {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  /* Пульсирующие элементы */
+  .pulse-glow {
+    animation: pulseGlow 2s infinite;
+  }
+
+  @keyframes pulseGlow {
+    0%,
+    100% {
+      box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 40px rgba(37, 99, 235, 0.8);
+    }
   }
 }
