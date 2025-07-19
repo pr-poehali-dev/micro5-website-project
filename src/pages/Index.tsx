@@ -9,6 +9,9 @@ import { Separator } from '@/components/ui/separator';
 import Icon from '@/components/ui/icon';
 import LoginModal from '@/components/LoginModal';
 import Dashboard from '@/components/Dashboard';
+import ExtendedApplicationForm from '@/components/ExtendedApplicationForm';
+import ApplicationStatus from '@/components/ApplicationStatus';
+import { simulateAmoCrmSubmission } from '@/utils/amoCrmIntegration';
 
 const Index = () => {
   const [loanAmount, setLoanAmount] = useState([25000]);
@@ -17,6 +20,8 @@ const Index = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userPhone, setUserPhone] = useState('');
+  const [currentView, setCurrentView] = useState<'main' | 'application' | 'status'>('main');
+  const [applicationId, setApplicationId] = useState('');
 
   const dailyRate = 0.08; // 0.08% в день
   const totalInterest = (loanAmount[0] * dailyRate * loanDays[0]) / 100;
@@ -44,8 +49,52 @@ const Index = () => {
     setUserPhone('');
   };
 
+  const handleStartApplication = () => {
+    setCurrentView('application');
+  };
+
+  const handleApplicationSubmit = async (formData: any) => {
+    const applicationData = {
+      ...formData,
+      loanAmount: loanAmount[0],
+      loanDays: loanDays[0]
+    };
+
+    const result = await simulateAmoCrmSubmission(applicationData);
+    
+    if (result.success) {
+      setApplicationId(result.leadId || '');
+      setCurrentView('status');
+    }
+  };
+
+  const handleBackToMain = () => {
+    setCurrentView('main');
+    setCurrentStep(1);
+  };
+
   if (isLoggedIn) {
     return <Dashboard userPhone={userPhone} onLogout={handleLogout} />;
+  }
+
+  if (currentView === 'application') {
+    return (
+      <ExtendedApplicationForm
+        loanAmount={loanAmount[0]}
+        loanDays={loanDays[0]}
+        onSubmit={handleApplicationSubmit}
+        onBack={handleBackToMain}
+      />
+    );
+  }
+
+  if (currentView === 'status') {
+    return (
+      <ApplicationStatus
+        applicationId={applicationId}
+        onBackToMain={handleBackToMain}
+      />
+    );
   }
 
   return (
@@ -190,7 +239,7 @@ const Index = () => {
 
                 <Button 
                   className="w-full bg-micro-blue hover:bg-blue-600 text-white py-4 rounded-2xl text-lg font-semibold"
-                  onClick={() => setCurrentStep(1)}
+                  onClick={handleStartApplication}
                 >
                   Получить займ
                   <Icon name="ArrowRight" size={20} className="ml-2" />
