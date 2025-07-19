@@ -7,12 +7,16 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import Icon from '@/components/ui/icon';
+import LoginModal from '@/components/LoginModal';
+import Dashboard from '@/components/Dashboard';
 
 const Index = () => {
   const [loanAmount, setLoanAmount] = useState([25000]);
   const [loanDays, setLoanDays] = useState([15]);
   const [currentStep, setCurrentStep] = useState(1);
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userPhone, setUserPhone] = useState('');
 
   const dailyRate = 0.08; // 0.08% в день
   const totalInterest = (loanAmount[0] * dailyRate * loanDays[0]) / 100;
@@ -29,6 +33,20 @@ const Index = () => {
       setCurrentStep(currentStep - 1);
     }
   };
+
+  const handleLogin = (phone: string, code: string) => {
+    setUserPhone(phone);
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUserPhone('');
+  };
+
+  if (isLoggedIn) {
+    return <Dashboard userPhone={userPhone} onLogout={handleLogout} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-micro-gray via-white to-micro-light">
@@ -51,10 +69,12 @@ const Index = () => {
                 <Icon name="Phone" size={16} className="mr-2" />
                 Обратный звонок
               </Button>
-              <Button className="bg-micro-blue hover:bg-blue-600 rounded-full">
-                <Icon name="User" size={16} className="mr-2" />
-                Личный кабинет
-              </Button>
+              <LoginModal onLogin={handleLogin}>
+                <Button className="bg-micro-blue hover:bg-blue-600 rounded-full">
+                  <Icon name="User" size={16} className="mr-2" />
+                  Личный кабинет
+                </Button>
+              </LoginModal>
             </nav>
 
             <Button variant="ghost" className="md:hidden">
@@ -281,9 +301,11 @@ const Index = () => {
                       Ваша заявка успешно отправлена. Решение будет принято в течение 15 минут.
                       Статус заявки можно отслеживать в личном кабинете.
                     </p>
-                    <Button className="bg-micro-blue hover:bg-blue-600 rounded-xl">
-                      Перейти в личный кабинет
-                    </Button>
+                    <LoginModal onLogin={handleLogin}>
+                      <Button className="bg-micro-blue hover:bg-blue-600 rounded-xl">
+                        Перейти в личный кабинет
+                      </Button>
+                    </LoginModal>
                   </div>
                 )}
 
