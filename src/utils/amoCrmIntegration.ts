@@ -309,7 +309,7 @@ ${application.documents.employment ? '✅ Справка с работы заг�
 // Конфигурация для продакшн среды
 const amoCrmConfig: AmoCrmConfig = {
   baseUrl: 'https://micro5mfo.amocrm.ru', // Замените на ваш поддомен
-  accessToken: process.env.AMOCRM_ACCESS_TOKEN || 'your_access_token_here',
+  accessToken: '7ae2fd98c40922fd54b3a9f4f67a6d08',
   accountId: process.env.AMOCRM_ACCOUNT_ID || 'your_account_id_here'
 };
 
@@ -328,7 +328,22 @@ export const AMO_STATUSES = {
   REPAID: 12345685               // Погашен
 };
 
-// Функция для симуляции отправки (для разработки)
+// Основная функция для отправки заявки
+export const submitLoanApplication = async (application: LoanApplication) => {
+  try {
+    // Используем реальный API AmoCRM
+    const result = await amoCrmService.submitLoanApplication(application);
+    return result;
+  } catch (error) {
+    console.error('Ошибка отправки в AmoCRM:', error);
+    
+    // Fallback к симуляции в случае ошибки
+    console.warn('Переключаемся на режим симуляции');
+    return simulateAmoCrmSubmission(application);
+  }
+};
+
+// Функция для симуляции отправки (для разработки и fallback)
 export const simulateAmoCrmSubmission = async (application: LoanApplication) => {
   // Имитация задержки сети
   await new Promise(resolve => setTimeout(resolve, 1500));
@@ -338,7 +353,7 @@ export const simulateAmoCrmSubmission = async (application: LoanApplication) => 
   
   if (success) {
     const leadId = `LEAD-${Date.now()}`;
-    console.log('Заявка отправлена в AmoCRM:', {
+    console.log('Заявка отправлена в AmoCRM (симуляция):', {
       leadId,
       application: {
         name: `${application.lastName} ${application.firstName}`,

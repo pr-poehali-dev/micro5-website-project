@@ -11,7 +11,7 @@ import LoginModal from '@/components/LoginModal';
 import Dashboard from '@/components/Dashboard';
 import ExtendedApplicationForm from '@/components/ExtendedApplicationForm';
 import ApplicationStatus from '@/components/ApplicationStatus';
-import { simulateAmoCrmSubmission } from '@/utils/amoCrmIntegration';
+import { submitLoanApplication } from '@/utils/amoCrmIntegration';
 
 const Index = () => {
   const [loanAmount, setLoanAmount] = useState([25000]);
@@ -60,7 +60,7 @@ const Index = () => {
       loanDays: loanDays[0]
     };
 
-    const result = await simulateAmoCrmSubmission(applicationData);
+    const result = await submitLoanApplication(applicationData);
     
     if (result.success) {
       setApplicationId(result.leadId || '');
