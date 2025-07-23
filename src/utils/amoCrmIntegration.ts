@@ -310,7 +310,7 @@ ${application.documents.employment ? '✅ Справка с работы заг�
 const amoCrmConfig: AmoCrmConfig = {
   baseUrl: 'https://micro5mfo.amocrm.ru', // Замените на ваш поддомен
   accessToken: '7ae2fd98c40922fd54b3a9f4f67a6d08',
-  accountId: process.env.AMOCRM_ACCOUNT_ID || 'your_account_id_here'
+  accountId: 'micro5mfo'
 };
 
 // Создаем экземпляр сервиса

@@ -76,7 +76,7 @@ export const checkAmoCrmConfig = () => {
   console.log('🔧 Проверяю конфигурацию AmoCRM:');
   
   // Проверяем наличие API ключа
-  const hasApiKey = process.env.AMOCRM_ACCESS_TOKEN || '7ae2fd98c40922fd54b3a9f4f67a6d08';
+  const hasApiKey = '7ae2fd98c40922fd54b3a9f4f67a6d08';
   console.log('🔑 API ключ:', hasApiKey ? '✅ Установлен' : '❌ Отсутствует');
   
   // Проверяем базовый URL
@@ -91,7 +91,7 @@ export const checkAmoCrmConfig = () => {
 };
 
 // Автоматический запуск теста при импорте (только в dev режиме)
-if (process.env.NODE_ENV === 'development') {
+if (import.meta.env.DEV) {
   console.log('🔍 Dev режим: запускаю проверку конфигурации...');
   checkAmoCrmConfig();
 }
