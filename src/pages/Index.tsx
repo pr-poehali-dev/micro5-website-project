@@ -10,7 +10,7 @@ import Icon from '@/components/ui/icon';
 import LoginModal from '@/components/LoginModal';
 import Dashboard from '@/components/Dashboard';
 import ExtendedApplicationForm from '@/components/ExtendedApplicationForm';
-import ApplicationStatus from '@/components/ApplicationStatus';
+import ApplicationReview from '@/components/ApplicationReview';
 import { submitLoanApplication } from '@/utils/amoCrmIntegration';
 
 const Index = () => {
@@ -78,7 +78,7 @@ const Index = () => {
 
   if (currentView === 'status') {
     return (
-      <ApplicationStatus
+      <ApplicationReview
         applicationId={applicationId}
         onBackToMain={handleBackToMain}
       />
@@ -290,7 +290,7 @@ const Index = () => {
       </div>
 
       {/* Footer */}
-      <footer className="bg-micro-dark text-white py-12">
+      <footer className="bg-micro-dark text-white py-12 rounded-t-3xl">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
