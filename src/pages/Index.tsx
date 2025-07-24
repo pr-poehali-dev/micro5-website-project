@@ -5,6 +5,7 @@ import { Slider } from '@/components/ui/slider';
 
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
 import LoginModal from '@/components/LoginModal';
 import Dashboard from '@/components/Dashboard';
