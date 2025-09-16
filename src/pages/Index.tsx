@@ -10,7 +10,11 @@ import Icon from '@/components/ui/icon';
 import LoginModal from '@/components/LoginModal';
 import Dashboard from '@/components/Dashboard';
 import ExtendedApplicationForm from '@/components/ExtendedApplicationForm';
+import ImprovedLoanForm from '@/components/ImprovedLoanForm';
+import ApplicationSubmitted from '@/components/ApplicationSubmitted';
+import ApplicationProcessing from '@/components/ApplicationProcessing';
 import ApplicationReview from '@/components/ApplicationReview';
+import ApplicationRejected from '@/components/ApplicationRejected';
 import { submitLoanApplication } from '@/utils/amoCrmIntegration';
 
 const Index = () => {
@@ -19,8 +23,10 @@ const Index = () => {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userPhone, setUserPhone] = useState('');
-  const [currentView, setCurrentView] = useState<'main' | 'application' | 'status'>('main');
-  const [applicationId, setApplicationId] = useState('');
+  const [currentView, setCurrentView] = useState<'main' | 'form' | 'submitted' | 'processing' | 'review' | 'rejected'>('main');
+  const [applicationId] = useState(`ML${Date.now().toString().slice(-6)}`);
+  const [formData, setFormData] = useState(null);
+  const [debtAmount, setDebtAmount] = useState(0);
 
   const dailyRate = 0.08; // 0.08% в день
   const totalInterest = (loanAmount[0] * dailyRate * loanDays[0]) / 100;
@@ -39,7 +45,29 @@ const Index = () => {
   };
 
   const handleStartApplication = () => {
-    setCurrentView('application');
+    setCurrentView('form');
+  };
+
+  const handleFormSubmit = (data: any) => {
+    setFormData(data);
+    setCurrentView('submitted');
+  };
+
+  const handleContinueFromSubmitted = () => {
+    setCurrentView('processing');
+  };
+
+  const handleProcessingComplete = (approved: boolean, debt = 0) => {
+    setDebtAmount(debt);
+    if (approved) {
+      setCurrentView('review');
+    } else {
+      setCurrentView('rejected');
+    }
+  };
+
+  const handleNewApplication = () => {
+    setCurrentView('form');
   };
 
   const handleApplicationSubmit = async (formData: any) => {
@@ -61,22 +89,57 @@ const Index = () => {
     setCurrentView('main');
   };
 
+  const handleBackToForm = () => {
+    setCurrentView('form');
+  };
+
   if (isLoggedIn) {
     return <Dashboard userPhone={userPhone} onLogout={handleLogout} />;
   }
 
-  if (currentView === 'application') {
+  if (currentView === 'form') {
     return (
-      <ExtendedApplicationForm
+      <ImprovedLoanForm
         loanAmount={loanAmount[0]}
         loanDays={loanDays[0]}
-        onSubmit={handleApplicationSubmit}
+        onSubmit={handleFormSubmit}
         onBack={handleBackToMain}
       />
     );
   }
 
-  if (currentView === 'status') {
+  if (currentView === 'submitted') {
+    return (
+      <ApplicationSubmitted
+        applicationId={applicationId}
+        phoneNumber={formData?.phone || '+7 (999) XXX-XX-XX'}
+        onContinue={handleContinueFromSubmitted}
+      />
+    );
+  }
+
+  if (currentView === 'processing') {
+    return (
+      <ApplicationProcessing
+        applicationId={applicationId}
+        onProcessingComplete={handleProcessingComplete}
+        onBackToMain={handleBackToMain}
+      />
+    );
+  }
+
+  if (currentView === 'rejected') {
+    return (
+      <ApplicationRejected
+        applicationId={applicationId}
+        debtAmount={debtAmount}
+        onBackToMain={handleBackToMain}
+        onNewApplication={handleNewApplication}
+      />
+    );
+  }
+
+  if (currentView === 'review') {
     return (
       <ApplicationReview
         applicationId={applicationId}
@@ -84,6 +147,8 @@ const Index = () => {
       />
     );
   }
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-micro-gray via-white to-micro-light">
