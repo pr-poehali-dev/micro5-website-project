@@ -165,6 +165,7 @@ const Index = () => {
             
             <nav className="hidden md:flex items-center space-x-8">
               <a href="#calculator" className="text-micro-dark hover:text-micro-blue transition-colors">Калькулятор</a>
+              <a href="/widget-generator" className="text-micro-dark hover:text-micro-blue transition-colors">Виджет</a>
               <a href="#about" className="text-micro-dark hover:text-micro-blue transition-colors">О компании</a>
               <a href="#contacts" className="text-micro-dark hover:text-micro-blue transition-colors">Контакты</a>
               <Button variant="outline" className="rounded-full">
