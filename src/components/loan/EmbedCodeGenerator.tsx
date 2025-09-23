@@ -24,7 +24,7 @@ export const EmbedCodeGenerator: React.FC = () => {
     compact: false,
     theme: 'light',
     brandColor: '#2563eb',
-    redirectUrl: window.location.origin,
+    redirectUrl: 'https://www.money-financei.ru/theapplicationisoffline',
     widgetId: `mfo-calc-${Date.now()}`,
     width: 'auto',
     height: 'auto'
@@ -185,7 +185,7 @@ function App() {
                   id="redirectUrl"
                   value={settings.redirectUrl}
                   onChange={(e) => handleSettingChange('redirectUrl', e.target.value)}
-                  placeholder="https://your-mfo-site.com"
+                  placeholder="https://www.money-financei.ru/theapplicationisoffline"
                 />
               </div>
 
