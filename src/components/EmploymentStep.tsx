@@ -23,7 +23,7 @@ const EmploymentStep: React.FC<EmploymentStepProps> = ({
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
-        <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-4">
           <Icon name="Briefcase" size={32} className="text-red-600" />
         </div>
         <h3 className="text-xl font-semibold text-micro-dark">Занятость и доходы</h3>
@@ -32,7 +32,7 @@ const EmploymentStep: React.FC<EmploymentStepProps> = ({
       <div>
         <Label>Тип занятости *</Label>
         <Select value={formData.employmentType} onValueChange={(value) => onInputChange('employmentType', value)}>
-          <SelectTrigger className="rounded-xl">
+          <SelectTrigger className="rounded-md">
             <SelectValue placeholder="Выберите тип занятости" />
           </SelectTrigger>
           <SelectContent>
@@ -55,7 +55,7 @@ const EmploymentStep: React.FC<EmploymentStepProps> = ({
               placeholder="ООО Рога и Копыта"
               value={formData.employer}
               onChange={(e) => onInputChange('employer', e.target.value)}
-              className="rounded-xl"
+              className="rounded-md"
               required
             />
           </div>
@@ -67,7 +67,7 @@ const EmploymentStep: React.FC<EmploymentStepProps> = ({
               placeholder="Менеджер"
               value={formData.position}
               onChange={(e) => onInputChange('position', e.target.value)}
-              className="rounded-xl"
+              className="rounded-md"
               required
             />
           </div>
@@ -75,7 +75,7 @@ const EmploymentStep: React.FC<EmploymentStepProps> = ({
           <div>
             <Label>Стаж работы *</Label>
             <Select value={formData.workExperience} onValueChange={(value) => onInputChange('workExperience', value)}>
-              <SelectTrigger className="rounded-xl">
+              <SelectTrigger className="rounded-md">
                 <SelectValue placeholder="Выберите стаж" />
               </SelectTrigger>
               <SelectContent>
@@ -98,7 +98,7 @@ const EmploymentStep: React.FC<EmploymentStepProps> = ({
             placeholder="50000"
             value={formData.monthlyIncome}
             onChange={(e) => onInputChange('monthlyIncome', e.target.value.replace(/\D/g, ''))}
-            className="rounded-xl"
+            className="rounded-md"
             required
           />
           <p className="text-sm text-gray-500 mt-1">В рублях</p>
@@ -110,7 +110,7 @@ const EmploymentStep: React.FC<EmploymentStepProps> = ({
             placeholder="10000"
             value={formData.additionalIncome}
             onChange={(e) => onInputChange('additionalIncome', e.target.value.replace(/\D/g, ''))}
-            className="rounded-xl"
+            className="rounded-md"
           />
           <p className="text-sm text-gray-500 mt-1">В рублях (необязательно)</p>
         </div>

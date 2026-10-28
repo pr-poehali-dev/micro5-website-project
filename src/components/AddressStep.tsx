@@ -31,7 +31,7 @@ const AddressStep: React.FC<AddressStepProps> = ({
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
-        <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
           <Icon name="MapPin" size={32} className="text-orange-600" />
         </div>
         <h3 className="text-xl font-semibold text-micro-dark">Адреса</h3>
@@ -46,7 +46,7 @@ const AddressStep: React.FC<AddressStepProps> = ({
               placeholder="Московская область"
               value={formData.registrationAddress.region}
               onChange={(e) => onAddressChange('registrationAddress', 'region', e.target.value)}
-              className="rounded-xl"
+              className="rounded-md"
               required
             />
           </div>
@@ -56,7 +56,7 @@ const AddressStep: React.FC<AddressStepProps> = ({
               placeholder="Москва"
               value={formData.registrationAddress.city}
               onChange={(e) => onAddressChange('registrationAddress', 'city', e.target.value)}
-              className="rounded-xl"
+              className="rounded-md"
               required
             />
           </div>
@@ -66,7 +66,7 @@ const AddressStep: React.FC<AddressStepProps> = ({
               placeholder="ул. Тверская"
               value={formData.registrationAddress.street}
               onChange={(e) => onAddressChange('registrationAddress', 'street', e.target.value)}
-              className="rounded-xl"
+              className="rounded-md"
               required
             />
           </div>
@@ -76,7 +76,7 @@ const AddressStep: React.FC<AddressStepProps> = ({
               placeholder="12"
               value={formData.registrationAddress.house}
               onChange={(e) => onAddressChange('registrationAddress', 'house', e.target.value)}
-              className="rounded-xl"
+              className="rounded-md"
               required
             />
           </div>
@@ -86,7 +86,7 @@ const AddressStep: React.FC<AddressStepProps> = ({
               placeholder="34"
               value={formData.registrationAddress.apartment}
               onChange={(e) => onAddressChange('registrationAddress', 'apartment', e.target.value)}
-              className="rounded-xl"
+              className="rounded-md"
             />
           </div>
           <div>
@@ -95,7 +95,7 @@ const AddressStep: React.FC<AddressStepProps> = ({
               placeholder="123456"
               value={formData.registrationAddress.postalCode}
               onChange={(e) => onAddressChange('registrationAddress', 'postalCode', e.target.value.replace(/\D/g, '').slice(0, 6))}
-              className="rounded-xl"
+              className="rounded-md"
               maxLength={6}
               required
             />
@@ -122,7 +122,7 @@ const AddressStep: React.FC<AddressStepProps> = ({
                 placeholder="Московская область"
                 value={formData.actualAddress.region}
                 onChange={(e) => onAddressChange('actualAddress', 'region', e.target.value)}
-                className="rounded-xl"
+                className="rounded-md"
                 required
               />
             </div>
@@ -132,7 +132,7 @@ const AddressStep: React.FC<AddressStepProps> = ({
                 placeholder="Москва"
                 value={formData.actualAddress.city}
                 onChange={(e) => onAddressChange('actualAddress', 'city', e.target.value)}
-                className="rounded-xl"
+                className="rounded-md"
                 required
               />
             </div>
@@ -142,7 +142,7 @@ const AddressStep: React.FC<AddressStepProps> = ({
                 placeholder="ул. Тверская"
                 value={formData.actualAddress.street}
                 onChange={(e) => onAddressChange('actualAddress', 'street', e.target.value)}
-                className="rounded-xl"
+                className="rounded-md"
                 required
               />
             </div>
@@ -152,7 +152,7 @@ const AddressStep: React.FC<AddressStepProps> = ({
                 placeholder="12"
                 value={formData.actualAddress.house}
                 onChange={(e) => onAddressChange('actualAddress', 'house', e.target.value)}
-                className="rounded-xl"
+                className="rounded-md"
                 required
               />
             </div>
@@ -162,7 +162,7 @@ const AddressStep: React.FC<AddressStepProps> = ({
                 placeholder="34"
                 value={formData.actualAddress.apartment}
                 onChange={(e) => onAddressChange('actualAddress', 'apartment', e.target.value)}
-                className="rounded-xl"
+                className="rounded-md"
               />
             </div>
             <div>
@@ -171,7 +171,7 @@ const AddressStep: React.FC<AddressStepProps> = ({
                 placeholder="123456"
                 value={formData.actualAddress.postalCode}
                 onChange={(e) => onAddressChange('actualAddress', 'postalCode', e.target.value.replace(/\D/g, '').slice(0, 6))}
-                className="rounded-xl"
+                className="rounded-md"
                 maxLength={6}
                 required
               />

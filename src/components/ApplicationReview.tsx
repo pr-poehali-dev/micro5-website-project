@@ -55,11 +55,11 @@ const ApplicationReview: React.FC<ApplicationReviewProps> = ({
   const progress = ((60 - timeLeft) / 60) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-micro-gray via-white to-micro-light py-8">
+    <div className="min-h-screen bg-micro-gray py-8">
       <div className="container mx-auto px-4">
         <div className="max-w-2xl mx-auto">
           {status === 'processing' && (
-            <Card className="rounded-3xl border-0 shadow-2xl">
+            <Card className="rounded-lg border border-slate-200 shadow-sm">
               <CardHeader className="text-center pb-6">
                 <div className="w-20 h-20 bg-micro-blue/10 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
                   <Icon name="Clock" size={40} className="text-micro-blue" />
@@ -80,7 +80,7 @@ const ApplicationReview: React.FC<ApplicationReviewProps> = ({
                 
                 <Progress value={progress} className="h-3" />
                 
-                <div className="bg-micro-gray rounded-2xl p-6">
+                <div className="bg-micro-gray rounded-lg p-6">
                   <h3 className="font-semibold text-micro-dark mb-4">Что происходит сейчас:</h3>
                   <div className="space-y-3">
                     <div className="flex items-center">
@@ -108,7 +108,7 @@ const ApplicationReview: React.FC<ApplicationReviewProps> = ({
           )}
 
           {status === 'approved' && (
-            <Card className="rounded-3xl border-0 shadow-2xl">
+            <Card className="rounded-lg border border-slate-200 shadow-sm">
               <CardHeader className="text-center pb-6">
                 <div className="w-20 h-20 bg-micro-green/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Icon name="CheckCircle" size={40} className="text-micro-green" />
@@ -120,7 +120,7 @@ const ApplicationReview: React.FC<ApplicationReviewProps> = ({
               </CardHeader>
               
               <CardContent className="space-y-6">
-                <div className="bg-micro-green/5 border border-micro-green/20 rounded-2xl p-6">
+                <div className="bg-micro-green/5 border border-micro-green/20 rounded-lg p-6">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-gray-600">Заявка №</span>
                     <Badge className="bg-micro-green text-white">{applicationId}</Badge>
@@ -138,7 +138,7 @@ const ApplicationReview: React.FC<ApplicationReviewProps> = ({
                   </div>
                 </div>
                 
-                <div className="bg-micro-blue/5 border border-micro-blue/20 rounded-2xl p-6">
+                <div className="bg-micro-blue/5 border border-micro-blue/20 rounded-lg p-6">
                   <div className="flex items-center mb-3">
                     <Icon name="Phone" size={20} className="text-micro-blue mr-3" />
                     <h3 className="font-semibold text-micro-dark">Что дальше?</h3>
@@ -156,12 +156,12 @@ const ApplicationReview: React.FC<ApplicationReviewProps> = ({
                   <Button 
                     onClick={onBackToMain}
                     variant="outline"
-                    className="flex-1 rounded-xl"
+                    className="flex-1 rounded-md"
                   >
                     На главную
                   </Button>
                   <Button 
-                    className="flex-1 bg-micro-green hover:bg-red-700 rounded-xl"
+                    className="flex-1 bg-micro-green hover:bg-red-700 rounded-md"
                   >
                     <Icon name="Phone" size={16} className="mr-2" />
                     Перезвонить мне
@@ -172,7 +172,7 @@ const ApplicationReview: React.FC<ApplicationReviewProps> = ({
           )}
 
           {status === 'rejected' && (
-            <Card className="rounded-3xl border-0 shadow-2xl">
+            <Card className="rounded-lg border border-slate-200 shadow-sm">
               <CardHeader className="text-center pb-6">
                 <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Icon name="XCircle" size={40} className="text-red-600" />
@@ -184,7 +184,7 @@ const ApplicationReview: React.FC<ApplicationReviewProps> = ({
               </CardHeader>
               
               <CardContent className="space-y-6">
-                <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6">
                   <div className="flex items-center mb-3">
                     <Icon name="AlertTriangle" size={20} className="text-red-600 mr-3" />
                     <h3 className="font-semibold text-red-800">Причина отказа</h3>
@@ -199,7 +199,7 @@ const ApplicationReview: React.FC<ApplicationReviewProps> = ({
                   </div>
                 </div>
                 
-                <div className="bg-micro-gray rounded-2xl p-6">
+                <div className="bg-micro-gray rounded-lg p-6">
                   <h3 className="font-semibold text-micro-dark mb-4">Что можно сделать:</h3>
                   <div className="space-y-3">
                     <div className="flex items-start">
@@ -220,13 +220,13 @@ const ApplicationReview: React.FC<ApplicationReviewProps> = ({
                 <div className="flex gap-4">
                   <Button 
                     onClick={onBackToMain}
-                    className="flex-1 bg-micro-blue hover:bg-blue-800 rounded-xl"
+                    className="flex-1 bg-micro-blue hover:bg-blue-800 rounded-md"
                   >
                     На главную
                   </Button>
                   <Button 
                     variant="outline"
-                    className="flex-1 rounded-xl"
+                    className="flex-1 rounded-md"
                   >
                     <Icon name="ExternalLink" size={16} className="mr-2" />
                     Проверить ФССП

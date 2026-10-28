@@ -58,7 +58,7 @@ export const EmbeddableCalculator: React.FC<EmbeddableCalculatorProps> = ({
     <div className={containerClass} style={cardStyle}>
       <Card className={`
         ${theme === 'dark' ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'}
-        shadow-lg hover:shadow-xl transition-shadow duration-300
+        shadow-sm hover:border-micro-blue transition-shadow duration-300
       `}>
         <CardHeader className={compact ? 'pb-4' : 'pb-6'}>
           <CardTitle className={`
@@ -193,7 +193,7 @@ export const EmbeddableCalculator: React.FC<EmbeddableCalculatorProps> = ({
             onClick={handleApply}
             className={`
               w-full font-semibold py-3 transition-all duration-200
-              hover:scale-105 hover:shadow-lg
+              hover:scale-105 hover:shadow-sm
               ${compact ? 'text-sm' : 'text-base'}
             `}
             style={{ 

@@ -177,7 +177,7 @@ const ApplicationProcessing: React.FC<ApplicationProcessingProps> = ({
           На главную
         </Button>
 
-        <Card className="bg-white shadow-xl rounded-3xl border-0">
+        <Card className="bg-white shadow-md rounded-lg border border-slate-200">
           <CardHeader className="text-center pb-6">
             <CardTitle className="text-3xl text-micro-dark mb-2">
               Обработка заявки
@@ -255,7 +255,7 @@ const ApplicationProcessing: React.FC<ApplicationProcessingProps> = ({
             </div>
 
             {/* Информационное сообщение */}
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
               <div className="flex items-start space-x-3">
                 <Icon name="Info" size={20} className="text-micro-blue flex-shrink-0 mt-0.5" />
                 <div>

@@ -153,7 +153,7 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ applicationId, on
   const statusMessage = getCurrentStatusMessage();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-micro-gray via-white to-micro-light py-8">
+    <div className="min-h-screen bg-micro-gray py-8">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto">
           {/* Заголовок */}
@@ -167,7 +167,7 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ applicationId, on
           </div>
 
           {/* Основной статус */}
-          <Card className={`rounded-3xl border-0 shadow-lg mb-8 ${statusMessage.color} text-white`}>
+          <Card className={`rounded-lg border border-slate-200 shadow-sm mb-8 ${statusMessage.color} text-white`}>
             <CardContent className="p-8 text-center">
               <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 {currentStatus === 'approved' ? (
@@ -182,7 +182,7 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ applicationId, on
               <p className="text-lg opacity-90 mb-6">{statusMessage.message}</p>
               
               {currentStatus !== 'approved' && currentStatus !== 'rejected' && (
-                <div className="bg-white/20 rounded-2xl p-4">
+                <div className="bg-white/20 rounded-lg p-4">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm">Прогресс обработки</span>
                     <span className="text-sm font-medium">{Math.round(progress)}%</span>
@@ -199,7 +199,7 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ applicationId, on
           </Card>
 
           {/* Детальный прогресс */}
-          <Card className="rounded-3xl border-0 shadow-lg mb-8">
+          <Card className="rounded-lg border border-slate-200 shadow-sm mb-8">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Icon name="List" size={20} className="mr-2 text-micro-blue" />
@@ -243,7 +243,7 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ applicationId, on
           </Card>
 
           {/* Информация о заявке */}
-          <Card className="rounded-3xl border-0 shadow-lg mb-8">
+          <Card className="rounded-lg border border-slate-200 shadow-sm mb-8">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Icon name="FileText" size={20} className="mr-2 text-micro-blue" />
@@ -272,18 +272,18 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ applicationId, on
 
           {/* Действия */}
           {currentStatus === 'approved' && (
-            <Card className="rounded-3xl border-0 shadow-lg">
+            <Card className="rounded-lg border border-slate-200 shadow-sm">
               <CardContent className="p-8 text-center">
                 <h3 className="text-xl font-semibold text-micro-dark mb-4">Что дальше?</h3>
                 <p className="text-gray-600 mb-6">
                   Ваша заявка одобрена! Деньги будут переведены на указанную карту в течение 15 минут.
                 </p>
                 <div className="flex gap-4 justify-center">
-                  <Button className="bg-micro-green hover:bg-red-700 rounded-xl">
+                  <Button className="bg-micro-green hover:bg-red-700 rounded-md">
                     <Icon name="CreditCard" size={16} className="mr-2" />
                     Получить деньги
                   </Button>
-                  <Button variant="outline" className="rounded-xl">
+                  <Button variant="outline" className="rounded-md">
                     <Icon name="Download" size={16} className="mr-2" />
                     Скачать договор
                   </Button>
@@ -293,7 +293,7 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ applicationId, on
           )}
 
           {currentStatus === 'rejected' && (
-            <Card className="rounded-3xl border-0 shadow-lg">
+            <Card className="rounded-lg border border-slate-200 shadow-sm">
               <CardContent className="p-8 text-center">
                 <h3 className="text-xl font-semibold text-micro-dark mb-4">Заявка отклонена</h3>
                 <p className="text-gray-600 mb-6">
@@ -301,11 +301,11 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ applicationId, on
                   Вы можете подать новую заявку через 30 дней.
                 </p>
                 <div className="flex gap-4 justify-center">
-                  <Button onClick={onBackToMain} className="bg-micro-blue hover:bg-blue-800 rounded-xl">
+                  <Button onClick={onBackToMain} className="bg-micro-blue hover:bg-blue-800 rounded-md">
                     <Icon name="RotateCcw" size={16} className="mr-2" />
                     Попробовать снова
                   </Button>
-                  <Button variant="outline" className="rounded-xl">
+                  <Button variant="outline" className="rounded-md">
                     <Icon name="Phone" size={16} className="mr-2" />
                     Связаться с поддержкой
                   </Button>
@@ -318,11 +318,11 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ applicationId, on
           <div className="text-center mt-8">
             <p className="text-gray-600 mb-4">Есть вопросы? Мы всегда готовы помочь!</p>
             <div className="flex gap-4 justify-center">
-              <Button variant="outline" size="sm" className="rounded-xl">
+              <Button variant="outline" size="sm" className="rounded-md">
                 <Icon name="MessageCircle" size={16} className="mr-2" />
                 Чат
               </Button>
-              <Button variant="outline" size="sm" className="rounded-xl">
+              <Button variant="outline" size="sm" className="rounded-md">
                 <Icon name="Phone" size={16} className="mr-2" />
                 8 (800) 555-35-35
               </Button>

@@ -120,7 +120,7 @@ const ImprovedLoanForm: React.FC<ImprovedLoanFormProps> = ({
           <span className="sm:hidden">Назад</span><span className="hidden sm:inline">Вернуться к калькулятору</span>
         </Button>
 
-        <Card className="bg-white shadow-xl rounded-2xl sm:rounded-3xl border-0">
+        <Card className="bg-white shadow-md rounded-lg sm:rounded-lg border border-slate-200">
           <CardHeader className="text-center p-4 pb-4 sm:p-6 sm:pb-8">
             <CardTitle className="text-2xl sm:text-3xl text-micro-dark mb-1 sm:mb-2">Анкета на займ</CardTitle>
             <p className="text-gray-500">

@@ -90,7 +90,7 @@ const ApplicationRejected: React.FC<ApplicationRejectedProps> = ({
           На главную
         </Button>
 
-        <Card className="bg-white shadow-xl rounded-3xl border-0">
+        <Card className="bg-white shadow-md rounded-lg border border-slate-200">
           <CardHeader className="text-center pb-6">
             <div className="mx-auto w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6">
               <Icon name="XCircle" size={40} className="text-red-500" />
@@ -105,7 +105,7 @@ const ApplicationRejected: React.FC<ApplicationRejectedProps> = ({
 
           <CardContent className="space-y-8">
             {/* Причина отказа */}
-            <div className={`border border-${debtInfo.color}-200 rounded-2xl p-6 bg-${debtInfo.color}-50`}>
+            <div className={`border border-${debtInfo.color}-200 rounded-lg p-6 bg-${debtInfo.color}-50`}>
               <div className="flex items-start space-x-3">
                 <Icon name="AlertTriangle" size={24} className={`text-${debtInfo.color}-600 flex-shrink-0 mt-1`} />
                 <div>
@@ -131,7 +131,7 @@ const ApplicationRejected: React.FC<ApplicationRejectedProps> = ({
             </div>
 
             {/* Что делать дальше */}
-            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-micro-blue mb-4 flex items-center">
                 <Icon name="Lightbulb" size={20} className="mr-2" />
                 Что делать дальше?
@@ -178,7 +178,7 @@ const ApplicationRejected: React.FC<ApplicationRejectedProps> = ({
 
             {/* Таймер до следующей заявки */}
             {!canApplyAgain && (
-              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 text-center">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
                 <h3 className="text-lg font-semibold text-micro-dark mb-4">
                   Повторная заявка через:
                 </h3>
@@ -217,7 +217,7 @@ const ApplicationRejected: React.FC<ApplicationRejectedProps> = ({
             )}
 
             {/* Контакты поддержки */}
-            <div className="bg-micro-gray rounded-2xl p-6">
+            <div className="bg-micro-gray rounded-lg p-6">
               <h3 className="text-lg font-semibold text-micro-dark mb-4 flex items-center">
                 <Icon name="Headphones" size={20} className="mr-2" />
                 Нужна помощь?
@@ -247,7 +247,7 @@ const ApplicationRejected: React.FC<ApplicationRejectedProps> = ({
               {canApplyAgain ? (
                 <Button 
                   onClick={onNewApplication}
-                  className="w-full bg-micro-green hover:bg-red-700 text-white py-4 rounded-2xl text-lg font-semibold"
+                  className="w-full bg-micro-green hover:bg-red-700 text-white py-4 rounded-lg text-lg font-semibold"
                 >
                   Подать новую заявку
                   <Icon name="Plus" size={20} className="ml-2" />
@@ -255,7 +255,7 @@ const ApplicationRejected: React.FC<ApplicationRejectedProps> = ({
               ) : (
                 <Button 
                   disabled
-                  className="w-full bg-gray-300 text-gray-500 py-4 rounded-2xl text-lg font-semibold cursor-not-allowed"
+                  className="w-full bg-gray-300 text-gray-500 py-4 rounded-lg text-lg font-semibold cursor-not-allowed"
                 >
                   Подача заявки заблокирована
                   <Icon name="Clock" size={20} className="ml-2" />
@@ -265,7 +265,7 @@ const ApplicationRejected: React.FC<ApplicationRejectedProps> = ({
               <Button 
                 variant="outline"
                 onClick={onBackToMain}
-                className="w-full py-4 rounded-2xl text-lg font-semibold border-micro-blue text-micro-blue hover:bg-blue-50"
+                className="w-full py-4 rounded-lg text-lg font-semibold border-micro-blue text-micro-blue hover:bg-blue-50"
               >
                 Вернуться на главную
               </Button>

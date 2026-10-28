@@ -20,7 +20,7 @@ const ContactStep: React.FC<ContactStepProps> = ({
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
-        <div className="w-16 h-16 bg-micro-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-micro-blue/10 rounded-lg flex items-center justify-center mx-auto mb-4">
           <Icon name="Phone" size={32} className="text-micro-blue" />
         </div>
         <h3 className="text-xl font-semibold text-micro-dark">Контактные данные</h3>
@@ -35,7 +35,7 @@ const ContactStep: React.FC<ContactStepProps> = ({
             placeholder="+7 (999) 123-45-67"
             value={formData.phone}
             onChange={(e) => onInputChange('phone', formatPhoneNumber(e.target.value))}
-            className="rounded-xl"
+            className="rounded-md"
             maxLength={18}
             required
           />
@@ -48,7 +48,7 @@ const ContactStep: React.FC<ContactStepProps> = ({
             placeholder="example@mail.ru"
             value={formData.email}
             onChange={(e) => onInputChange('email', e.target.value)}
-            className="rounded-xl"
+            className="rounded-md"
             required
           />
         </div>

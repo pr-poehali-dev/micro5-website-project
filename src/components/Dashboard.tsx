@@ -112,13 +112,13 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-micro-gray via-white to-micro-light">
+    <div className="min-h-screen bg-micro-gray">
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
+      <header className="bg-white border-b-2 border-micro-blue sticky top-0 z-50">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-micro-blue rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-micro-blue rounded-md flex items-center justify-center">
                 <span className="text-white font-bold text-lg">М5</span>
               </div>
               <div>
@@ -128,14 +128,14 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
             </div>
             
             <div className="flex items-center space-x-1 sm:space-x-4">
-              <Button variant="outline" className="rounded-full hidden sm:inline-flex">
+              <Button variant="outline" className="rounded-md hidden sm:inline-flex">
                 <Icon name="Phone" size={16} className="mr-2" />
                 Поддержка
               </Button>
               <Button 
                 variant="ghost" 
                 onClick={onLogout}
-                className="rounded-full text-gray-600"
+                className="rounded-md text-gray-600"
               >
                 <Icon name="LogOut" size={16} className="sm:mr-2" />
                 <span className="hidden sm:inline">Выйти</span>
@@ -147,24 +147,24 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
 
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 pb-24 sm:pb-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 h-auto bg-white rounded-2xl p-1 shadow-lg fixed bottom-2 left-2 right-2 z-50 w-auto sm:static sm:w-full">
-            <TabsTrigger value="overview" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-xl data-[state=active]:bg-micro-blue data-[state=active]:text-white">
+          <TabsList className="grid w-full grid-cols-5 h-auto bg-white rounded-lg p-1 shadow-sm fixed bottom-2 left-2 right-2 z-50 w-auto sm:static sm:w-full">
+            <TabsTrigger value="overview" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-md data-[state=active]:bg-micro-blue data-[state=active]:text-white">
               <Icon name="LayoutDashboard" size={18} className="sm:mr-2" />
               Обзор
             </TabsTrigger>
-            <TabsTrigger value="loans" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-xl data-[state=active]:bg-micro-blue data-[state=active]:text-white">
+            <TabsTrigger value="loans" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-md data-[state=active]:bg-micro-blue data-[state=active]:text-white">
               <Icon name="CreditCard" size={18} className="sm:mr-2" />
               Займы
             </TabsTrigger>
-            <TabsTrigger value="applications" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-xl data-[state=active]:bg-micro-blue data-[state=active]:text-white">
+            <TabsTrigger value="applications" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-md data-[state=active]:bg-micro-blue data-[state=active]:text-white">
               <Icon name="FileText" size={18} className="sm:mr-2" />
               Заявки
             </TabsTrigger>
-            <TabsTrigger value="contracts" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-xl data-[state=active]:bg-micro-blue data-[state=active]:text-white">
+            <TabsTrigger value="contracts" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-md data-[state=active]:bg-micro-blue data-[state=active]:text-white">
               <Icon name="FileSignature" size={18} className="sm:mr-2" />
               Договоры
             </TabsTrigger>
-            <TabsTrigger value="profile" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-xl data-[state=active]:bg-micro-blue data-[state=active]:text-white">
+            <TabsTrigger value="profile" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-md data-[state=active]:bg-micro-blue data-[state=active]:text-white">
               <Icon name="UserRound" size={18} className="sm:mr-2" />
               Анкета
             </TabsTrigger>
@@ -173,7 +173,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
           {/* Обзор */}
           <TabsContent value="overview" className="space-y-6">
             <div className="grid md:grid-cols-3 gap-4 sm:gap-4 sm:p-6">
-              <Card className="bg-gradient-to-br from-micro-blue to-blue-800 text-white rounded-3xl border-0">
+              <Card className="bg-micro-blue text-white rounded-lg border border-slate-200">
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4">
                     <Icon name="Wallet" size={24} />
@@ -188,7 +188,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-micro-green to-red-600 text-white rounded-3xl border-0">
+              <Card className="bg-micro-green text-white rounded-lg border border-slate-200">
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4">
                     <Icon name="TrendingUp" size={24} />
@@ -199,7 +199,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white rounded-3xl border-0">
+              <Card className="bg-micro-dark text-white rounded-lg border border-slate-200">
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4">
                     <Icon name="CheckCircle" size={24} />
@@ -212,7 +212,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
             </div>
 
             {activeLoan && (
-              <Card className="rounded-3xl border-0 shadow-lg">
+              <Card className="rounded-lg border border-slate-200 shadow-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Icon name="Calendar" size={20} className="mr-2 text-micro-blue" />
@@ -258,11 +258,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-3">
-                    <Button className="flex-1 bg-micro-green hover:bg-red-700 rounded-xl">
+                    <Button className="flex-1 bg-micro-green hover:bg-red-700 rounded-md">
                       <Icon name="CreditCard" size={16} className="mr-2" />
                       Погасить займ
                     </Button>
-                    <Button variant="outline" className="flex-1 rounded-xl">
+                    <Button variant="outline" className="flex-1 rounded-md">
                       <Icon name="Download" size={16} className="mr-2" />
                       Скачать договор
                     </Button>
@@ -271,7 +271,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
               </Card>
             )}
 
-            <Card className="rounded-3xl border-0 shadow-lg">
+            <Card className="rounded-lg border border-slate-200 shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Icon name="Plus" size={20} className="mr-2 text-micro-blue" />
@@ -282,7 +282,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                 <p className="text-gray-600 mb-6">
                   Получите займ до 50 000 ₽ на срок до 30 дней
                 </p>
-                <Button className="w-full bg-micro-blue hover:bg-blue-800 rounded-xl py-3">
+                <Button className="w-full bg-micro-blue hover:bg-blue-800 rounded-md py-3">
                   <Icon name="Calculator" size={16} className="mr-2" />
                   Рассчитать займ
                 </Button>
@@ -295,7 +295,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
             <div className="space-y-4">
               {loans.length === 0 && <p className="text-center text-gray-600 py-8">Займов пока нет</p>}
               {loans.map((loan) => (
-                <Card key={loan.id} className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-shadow">
+                <Card key={loan.id} className="rounded-lg border border-slate-200 shadow-sm hover:border-micro-blue transition-shadow">
                   <CardContent className="p-4 sm:p-6">
                     <div className="flex justify-between items-start mb-4">
                       <div>
@@ -327,13 +327,13 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                     {loan.status === 'active' && (
                       <div className="mt-4 pt-4 border-t border-gray-200">
                         <div className="flex flex-col sm:flex-row gap-3">
-                          <Button size="sm" className="bg-micro-green hover:bg-red-700 rounded-xl">
+                          <Button size="sm" className="bg-micro-green hover:bg-red-700 rounded-md">
                             Погасить
                           </Button>
-                          <Button size="sm" variant="outline" className="rounded-xl">
+                          <Button size="sm" variant="outline" className="rounded-md">
                             Продлить
                           </Button>
-                          <Button size="sm" variant="ghost" className="rounded-xl">
+                          <Button size="sm" variant="ghost" className="rounded-md">
                             Подробнее
                           </Button>
                         </div>
@@ -350,7 +350,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
             <div className="space-y-4">
               {applications.length === 0 && <p className="text-center text-gray-600 py-8">Заявок пока нет</p>}
               {applications.map((app) => (
-                <Card key={app.id} className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-shadow">
+                <Card key={app.id} className="rounded-lg border border-slate-200 shadow-sm hover:border-micro-blue transition-shadow">
                   <CardContent className="p-4 sm:p-6">
                     <div className="flex justify-between items-start mb-4">
                       <div>
@@ -366,7 +366,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                       </Badge>
                     </div>
 
-                    <div className="bg-micro-gray rounded-xl p-4">
+                    <div className="bg-micro-gray rounded-md p-4">
                       <p className="text-sm font-medium text-micro-dark">{app.statusText}</p>
                       {app.status === 'processing' && (
                         <div className="mt-2">
@@ -381,7 +381,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
 
                     {app.status === 'approved' && (
                       <div className="mt-4 pt-4 border-t border-gray-200">
-                        <Button size="sm" className="bg-micro-blue hover:bg-blue-800 rounded-xl">
+                        <Button size="sm" className="bg-micro-blue hover:bg-blue-800 rounded-md">
                           <Icon name="Download" size={14} className="mr-2" />
                           Получить деньги
                         </Button>
@@ -396,10 +396,10 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
           <TabsContent value="contracts" className="space-y-4">
             {loans.length === 0 && <p className="text-center text-gray-600 py-8">Договоров пока нет</p>}
             {loans.map((loan) => (
-              <Card key={loan.id} className="rounded-3xl border-0 shadow-lg">
+              <Card key={loan.id} className="rounded-lg border border-slate-200 shadow-sm">
                 <CardContent className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-micro-light flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-lg bg-micro-light flex items-center justify-center">
                       <Icon name="FileText" size={22} className="text-micro-green" />
                     </div>
                     <div>
@@ -407,7 +407,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                       <p className="text-sm text-gray-600">{loan.amount.toLocaleString()} ₽, до {new Date(loan.dueDate).toLocaleDateString('ru-RU')}</p>
                     </div>
                   </div>
-                  <Button variant="outline" className="rounded-xl w-full sm:w-auto">
+                  <Button variant="outline" className="rounded-md w-full sm:w-auto">
                     <Icon name="Download" size={16} className="mr-2" />
                     Скачать
                   </Button>
@@ -417,7 +417,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">
-            <Card className="rounded-3xl border-0 shadow-lg">
+            <Card className="rounded-lg border border-slate-200 shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Icon name="UserRound" size={20} className="mr-2 text-micro-blue" />
@@ -431,17 +431,17 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                       <div key={key} className="space-y-1">
                         <label className="text-sm text-gray-600">{label}</label>
                         <input
-                          className="w-full rounded-xl border border-input px-3 py-2 text-base"
+                          className="w-full rounded-md border border-input px-3 py-2 text-base"
                           value={form[key] || ''}
                           onChange={(e) => setForm({ ...form, [key]: e.target.value })}
                         />
                       </div>
                     ))}
                     <div className="flex gap-3">
-                      <Button onClick={saveProfile} disabled={saving} className="flex-1 bg-micro-blue hover:bg-blue-800 rounded-xl">
+                      <Button onClick={saveProfile} disabled={saving} className="flex-1 bg-micro-blue hover:bg-blue-800 rounded-md">
                         Сохранить
                       </Button>
-                      <Button variant="outline" onClick={() => setEditing(false)} className="flex-1 rounded-xl">
+                      <Button variant="outline" onClick={() => setEditing(false)} className="flex-1 rounded-md">
                         Отмена
                       </Button>
                     </div>
@@ -460,7 +460,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                         {profile.docsVerified ? 'Проверены' : 'На проверке'}
                       </Badge>
                     </div>
-                    <Button onClick={startEdit} className="w-full bg-micro-blue hover:bg-blue-800 rounded-xl">
+                    <Button onClick={startEdit} className="w-full bg-micro-blue hover:bg-blue-800 rounded-md">
                       <Icon name="Pencil" size={16} className="mr-2" />
                       Обновить анкету
                     </Button>

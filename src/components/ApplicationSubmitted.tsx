@@ -17,7 +17,7 @@ const ApplicationSubmitted: React.FC<ApplicationSubmittedProps> = ({
   return (
     <div className="min-h-screen bg-micro-gray flex items-center justify-center py-8">
       <div className="container mx-auto px-4 max-w-2xl">
-        <Card className="bg-white shadow-xl rounded-3xl border-0 text-center">
+        <Card className="bg-white shadow-md rounded-lg border border-slate-200 text-center">
           <CardHeader className="pb-6">
             <div className="mx-auto w-20 h-20 bg-micro-green rounded-full flex items-center justify-center mb-6">
               <Icon name="Check" size={40} className="text-white" />
@@ -31,7 +31,7 @@ const ApplicationSubmitted: React.FC<ApplicationSubmittedProps> = ({
           </CardHeader>
 
           <CardContent className="space-y-8">
-            <div className="bg-micro-gray rounded-2xl p-6">
+            <div className="bg-micro-gray rounded-lg p-6">
               <h3 className="text-xl font-semibold text-micro-dark mb-4">
                 Что происходит дальше?
               </h3>
@@ -73,7 +73,7 @@ const ApplicationSubmitted: React.FC<ApplicationSubmittedProps> = ({
               </div>
             </div>
 
-            <div className="border border-micro-blue/20 rounded-2xl p-6 bg-blue-50">
+            <div className="border border-micro-blue/20 rounded-lg p-6 bg-blue-50">
               <div className="flex items-center justify-center space-x-2 mb-3">
                 <Icon name="Clock" size={20} className="text-micro-blue" />
                 <span className="font-semibold text-micro-blue">Время рассмотрения</span>
@@ -85,20 +85,20 @@ const ApplicationSubmitted: React.FC<ApplicationSubmittedProps> = ({
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-4 bg-red-50 rounded-xl border border-red-200">
+              <div className="text-center p-4 bg-red-50 rounded-md border border-red-200">
                 <Icon name="Phone" size={24} className="text-micro-green mx-auto mb-2" />
                 <h4 className="font-semibold text-micro-dark text-sm">Звонок оператора</h4>
                 <p className="text-gray-600 text-xs">При одобрении</p>
               </div>
               
-              <div className="text-center p-4 bg-blue-50 rounded-xl border border-blue-200">
+              <div className="text-center p-4 bg-blue-50 rounded-md border border-blue-200">
                 <Icon name="MessageSquare" size={24} className="text-micro-blue mx-auto mb-2" />
                 <h4 className="font-semibold text-micro-dark text-sm">SMS уведомление</h4>
                 <p className="text-gray-600 text-xs">О статусе заявки</p>
               </div>
             </div>
 
-            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
               <div className="flex items-start space-x-2">
                 <Icon name="AlertTriangle" size={20} className="text-yellow-600 flex-shrink-0 mt-0.5" />
                 <div className="text-left">
@@ -113,7 +113,7 @@ const ApplicationSubmitted: React.FC<ApplicationSubmittedProps> = ({
 
             <Button 
               onClick={onContinue}
-              className="w-full bg-micro-blue hover:bg-blue-800 text-white py-4 rounded-2xl text-lg font-semibold"
+              className="w-full bg-micro-blue hover:bg-blue-800 text-white py-4 rounded-lg text-lg font-semibold"
             >
               Отследить статус заявки
               <Icon name="ArrowRight" size={20} className="ml-2" />

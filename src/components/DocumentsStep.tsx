@@ -29,14 +29,14 @@ const DocumentsStep: React.FC<DocumentsStepProps> = ({
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
-        <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
           <Icon name="Upload" size={32} className="text-blue-600" />
         </div>
         <h3 className="text-xl font-semibold text-micro-dark">Загрузка документов</h3>
         <p className="text-gray-600">Загрузите скан-копии или фотографии документов</p>
       </div>
       
-      <div className="border-2 border-dashed border-gray-300 rounded-2xl p-6">
+      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
         <div className="text-center">
           <Icon name="FileText" size={32} className="text-gray-400 mx-auto mb-2" />
           <h4 className="font-medium mb-2">Паспорт (главная страница) *</h4>
@@ -49,7 +49,7 @@ const DocumentsStep: React.FC<DocumentsStepProps> = ({
             id="passport-upload"
           />
           <label htmlFor="passport-upload">
-            <Button variant="outline" className="rounded-xl" asChild>
+            <Button variant="outline" className="rounded-md" asChild>
               <span>
                 <Icon name="Upload" size={16} className="mr-2" />
                 Выбрать файл
@@ -65,7 +65,7 @@ const DocumentsStep: React.FC<DocumentsStepProps> = ({
         </div>
       </div>
       
-      <div className="border-2 border-dashed border-gray-300 rounded-2xl p-6">
+      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
         <div className="text-center">
           <Icon name="FileBarChart" size={32} className="text-gray-400 mx-auto mb-2" />
           <h4 className="font-medium mb-2">Справка о доходах</h4>
@@ -78,7 +78,7 @@ const DocumentsStep: React.FC<DocumentsStepProps> = ({
             id="income-upload"
           />
           <label htmlFor="income-upload">
-            <Button variant="outline" className="rounded-xl" asChild>
+            <Button variant="outline" className="rounded-md" asChild>
               <span>
                 <Icon name="Upload" size={16} className="mr-2" />
                 Выбрать файл
@@ -94,7 +94,7 @@ const DocumentsStep: React.FC<DocumentsStepProps> = ({
         </div>
       </div>
       
-      <div className="border-2 border-dashed border-gray-300 rounded-2xl p-6">
+      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
         <div className="text-center">
           <Icon name="Building" size={32} className="text-gray-400 mx-auto mb-2" />
           <h4 className="font-medium mb-2">Справка с места работы</h4>
@@ -107,7 +107,7 @@ const DocumentsStep: React.FC<DocumentsStepProps> = ({
             id="employment-upload"
           />
           <label htmlFor="employment-upload">
-            <Button variant="outline" className="rounded-xl" asChild>
+            <Button variant="outline" className="rounded-md" asChild>
               <span>
                 <Icon name="Upload" size={16} className="mr-2" />
                 Выбрать файл

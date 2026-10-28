@@ -101,10 +101,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ children, onLogin }) => {
         
         <div className="space-y-6">
           {step === 'phone' && (
-            <Card className="border-0 bg-micro-gray">
+            <Card className="border border-slate-200 bg-micro-gray">
               <CardContent className="p-6 space-y-4">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-micro-blue/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-micro-blue/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                     <Icon name="Smartphone" size={32} className="text-micro-blue" />
                   </div>
                   <h3 className="font-semibold text-micro-dark mb-2">Введите номер телефона</h3>
@@ -122,7 +122,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ children, onLogin }) => {
                       placeholder="+7 (999) 123-45-67"
                       value={phone}
                       onChange={handlePhoneChange}
-                      className="rounded-xl text-lg"
+                      className="rounded-md text-lg"
                       maxLength={18}
                     />
                   </div>
@@ -130,7 +130,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ children, onLogin }) => {
                   <Button 
                     onClick={handleSendCode}
                     disabled={phone.length < 18 || isLoading}
-                    className="w-full bg-micro-blue hover:bg-blue-800 rounded-xl py-3"
+                    className="w-full bg-micro-blue hover:bg-blue-800 rounded-md py-3"
                   >
                     {isLoading ? (
                       <>
@@ -150,10 +150,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ children, onLogin }) => {
           )}
 
           {step === 'code' && (
-            <Card className="border-0 bg-micro-gray">
+            <Card className="border border-slate-200 bg-micro-gray">
               <CardContent className="p-6 space-y-4">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-micro-green/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-micro-green/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                     <Icon name="ShieldCheck" size={32} className="text-micro-green" />
                   </div>
                   <h3 className="font-semibold text-micro-dark mb-2">Введите код из SMS</h3>
@@ -178,7 +178,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ children, onLogin }) => {
                       placeholder="1234"
                       value={code}
                       onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                      className="rounded-xl text-lg text-center tracking-widest"
+                      className="rounded-md text-lg text-center tracking-widest"
                       maxLength={4}
                       autoFocus
                     />
@@ -210,7 +210,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ children, onLogin }) => {
                   <Button 
                     onClick={handleVerifyCode}
                     disabled={code.length !== 4 || isLoading}
-                    className="w-full bg-micro-green hover:bg-red-700 rounded-xl py-3"
+                    className="w-full bg-micro-green hover:bg-red-700 rounded-md py-3"
                   >
                     {isLoading ? (
                       <>

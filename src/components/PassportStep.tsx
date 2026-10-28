@@ -22,7 +22,7 @@ const PassportStep: React.FC<PassportStepProps> = ({
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
-        <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-4">
           <Icon name="FileText" size={32} className="text-red-600" />
         </div>
         <h3 className="text-xl font-semibold text-micro-dark">Паспортные данные</h3>
@@ -36,7 +36,7 @@ const PassportStep: React.FC<PassportStepProps> = ({
             placeholder="1234"
             value={formData.passportSeries}
             onChange={(e) => onInputChange('passportSeries', e.target.value.replace(/\D/g, '').slice(0, 4))}
-            className="rounded-xl"
+            className="rounded-md"
             maxLength={4}
             required
           />
@@ -48,7 +48,7 @@ const PassportStep: React.FC<PassportStepProps> = ({
             placeholder="567890"
             value={formData.passportNumber}
             onChange={(e) => onInputChange('passportNumber', e.target.value.replace(/\D/g, '').slice(0, 6))}
-            className="rounded-xl"
+            className="rounded-md"
             maxLength={6}
             required
           />
@@ -62,7 +62,7 @@ const PassportStep: React.FC<PassportStepProps> = ({
           type="date"
           value={formData.passportIssueDate}
           onChange={(e) => onInputChange('passportIssueDate', e.target.value)}
-          className="rounded-xl"
+          className="rounded-md"
           required
         />
       </div>
@@ -74,7 +74,7 @@ const PassportStep: React.FC<PassportStepProps> = ({
           placeholder="ОТДЕЛОМ УФМС РОССИИ ПО Г. МОСКВЕ"
           value={formData.passportIssuer}
           onChange={(e) => onInputChange('passportIssuer', e.target.value)}
-          className="rounded-xl"
+          className="rounded-md"
           rows={2}
           required
         />
@@ -91,7 +91,7 @@ const PassportStep: React.FC<PassportStepProps> = ({
             const formatted = value.length > 3 ? `${value.slice(0, 3)}-${value.slice(3, 6)}` : value;
             onInputChange('passportCode', formatted);
           }}
-          className="rounded-xl"
+          className="rounded-md"
           maxLength={7}
           required
         />
