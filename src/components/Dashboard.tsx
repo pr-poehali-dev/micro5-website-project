@@ -226,7 +226,6 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
               ))}
             </div>
 
-            {docsDone && <DocumentsUpload documents={documents} onChanged={reload} />}
           </TabsContent>
 
           <TabsContent value="loans" className="space-y-3">
