@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
 import Logo from '@/components/Logo';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import ChatWidget from '@/components/ChatWidget';
 import LoginModal from '@/components/LoginModal';
 import Dashboard from '@/components/Dashboard';
@@ -161,6 +162,13 @@ const Index = () => {
 
   const returnDate = new Date(Date.now() + loanDays[0] * 86400000).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
 
+  const faq = [
+    ['Как получить заём?', 'Выберите сумму и срок на калькуляторе, нажмите «Получить деньги» и заполните анкету. Затем запишите короткое видео лица, дождитесь одобрения, подпишите договор по коду из уведомления и после проверки получите деньги на карту.'],
+    ['Как погасить заём?', 'Зайдите в личный кабинет, откройте карточку активного займа и нажмите «Погасить». Нужно вернуть сумму займа и проценты до даты, указанной в договоре.'],
+    ['Как продлить заём?', 'В личном кабинете в карточке активного займа нажмите «Продлить». Срок увеличится на 7 дней после оплаты процентов за эти дни. Продлить можно не более 3 раз.'],
+    ['Что делать при просрочке?', 'Погасите заём как можно скорее в личном кабинете: за каждый день просрочки начисляются проценты. Если вы не успеваете, продлите срок до даты возврата. А если возникли трудности, напишите нам в чат, и мы подскажем решение.'],
+  ];
+
   const steps = [
     { title: 'Выберите срок и сумму займа', sub: 'на сайте или в приложении', text: 'Если вы уже брали деньги в Микро5, создайте новую заявку через личный кабинет.', img: 'https://cdn.poehali.dev/projects/e3537bf7-cb66-4f9a-9bc1-129fdca111a7/files/f7c07ff8-23bc-46f8-b40b-93f85031162e.jpg' },
     { title: 'Заполните анкету', sub: 'как в паспорте', text: 'Укажите данные и пройдите короткую видеоидентификацию: достаточно 6 секунд.', icon: 'IdCard' },
@@ -176,6 +184,7 @@ const Index = () => {
           <nav className="hidden md:flex items-center gap-8 text-white/90 text-sm">
             <a href="#calculator" className="hover:text-white">Калькулятор</a>
             <a href="#how" className="hover:text-white">Как получить</a>
+            <a href="#faq" className="hover:text-white">Вопросы</a>
             <a href="#app" className="hover:text-white">Личный кабинет</a>
             <a href="#contacts" className="hover:text-white">Контакты</a>
           </nav>
@@ -281,6 +290,20 @@ const Index = () => {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section id="faq" className="py-12 bg-micro-gray">
+        <div className="container mx-auto px-4 max-w-3xl">
+          <h2 className="font-display font-bold text-3xl md:text-4xl mb-6">Частые вопросы</h2>
+          <Accordion type="single" collapsible className="space-y-3">
+            {faq.map(([q, a], i) => (
+              <AccordionItem key={q} value={`q${i}`} className="rounded-2xl border-0 bg-white px-5 shadow-sm">
+                <AccordionTrigger className="text-left text-base md:text-lg font-semibold hover:no-underline">{q}</AccordionTrigger>
+                <AccordionContent className="text-gray-600 text-base leading-relaxed">{a}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </section>
 
