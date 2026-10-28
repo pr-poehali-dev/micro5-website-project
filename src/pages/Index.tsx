@@ -36,7 +36,7 @@ const Index = () => {
 
 
 
-  const handleLogin = (phone: string, code: string) => {
+  const handleLogin = (phone: string) => {
     setUserPhone(phone);
     setIsLoggedIn(true);
   };
@@ -185,9 +185,12 @@ const Index = () => {
               </LoginModal>
             </nav>
 
-            <Button variant="ghost" className="md:hidden">
-              <Icon name="Menu" size={24} />
-            </Button>
+            <LoginModal onLogin={handleLogin}>
+              <Button className="md:hidden bg-micro-blue hover:bg-blue-800 text-white h-10">
+                <Icon name="User" size={16} className="mr-2" />
+                Войти
+              </Button>
+            </LoginModal>
           </div>
         </div>
       </header>

@@ -3,241 +3,88 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { callCabinet, setToken } from '@/lib/cabinetApi';
 
 interface LoginModalProps {
   children: React.ReactNode;
-  onLogin?: (phone: string, code: string) => void;
+  onLogin?: (phone: string) => void;
 }
 
+const formatPhone = (value: string) => {
+  let d = value.replace(/\D/g, '');
+  if (d.startsWith('7') || d.startsWith('8')) d = d.slice(1);
+  d = d.slice(0, 10);
+  if (!d) return '';
+  let r = '+7 (' + d.slice(0, 3);
+  if (d.length >= 3) r += ')';
+  if (d.length > 3) r += ' ' + d.slice(3, 6);
+  if (d.length > 6) r += '-' + d.slice(6, 8);
+  if (d.length > 8) r += '-' + d.slice(8, 10);
+  return r;
+};
+
 const LoginModal: React.FC<LoginModalProps> = ({ children, onLogin }) => {
-  const [step, setStep] = useState<'phone' | 'code'>('phone');
   const [phone, setPhone] = useState('');
-  const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [countdown, setCountdown] = useState(0);
   const [error, setError] = useState('');
 
-  const formatPhone = (value: string) => {
-    const cleaned = value.replace(/\D/g, '');
-    if (cleaned.length === 0) return '';
-    if (cleaned.length <= 1) return `+7`;
-    if (cleaned.length <= 4) return `+7 (${cleaned.slice(1)}`;
-    if (cleaned.length <= 7) return `+7 (${cleaned.slice(1, 4)}) ${cleaned.slice(4)}`;
-    if (cleaned.length <= 9) return `+7 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
-    return `+7 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7, 9)}-${cleaned.slice(9, 11)}`;
-  };
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatPhone(e.target.value);
-    setPhone(formatted);
-  };
-
-  const handleSendCode = async () => {
-    setIsLoading(true);
-    
-    // Имитация отправки SMS
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    setStep('code');
-    setIsLoading(false);
-    setCountdown(60);
-    
-    // Запускаем обратный отсчёт
-    const timer = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  const handleVerifyCode = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
     setError('');
     try {
       const data = await callCabinet({ action: 'login', phone });
       setToken(data.token);
-      if (onLogin) {
-        onLogin(phone, code);
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Ошибка входа');
+      onLogin?.(phone);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка входа');
     }
     setIsLoading(false);
   };
 
-  const handleResendCode = () => {
-    setCountdown(60);
-    
-    const timer = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-center text-2xl font-bold text-micro-dark">
+          <DialogTitle className="text-center text-2xl font-semibold text-micro-dark">
             Вход в личный кабинет
           </DialogTitle>
         </DialogHeader>
-        
-        <div className="space-y-6">
-          {step === 'phone' && (
-            <Card className="border border-slate-200 bg-micro-gray">
-              <CardContent className="p-6 space-y-4">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-micro-blue/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <Icon name="Smartphone" size={32} className="text-micro-blue" />
-                  </div>
-                  <h3 className="font-semibold text-micro-dark mb-2">Введите номер телефона</h3>
-                  <p className="text-gray-600 text-sm">
-                    Мы отправим SMS с кодом подтверждения
-                  </p>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="phone-login">Номер телефона</Label>
-                    <Input
-                      id="phone-login"
-                      type="tel"
-                      placeholder="+7 (999) 123-45-67"
-                      value={phone}
-                      onChange={handlePhoneChange}
-                      className="rounded-md text-lg"
-                      maxLength={18}
-                    />
-                  </div>
-                  
-                  <Button 
-                    onClick={handleSendCode}
-                    disabled={phone.length < 18 || isLoading}
-                    className="w-full bg-micro-blue hover:bg-blue-800 rounded-md py-3"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Icon name="Loader2" size={16} className="mr-2 animate-spin" />
-                        Отправляем SMS...
-                      </>
-                    ) : (
-                      <>
-                        <Icon name="MessageSquare" size={16} className="mr-2" />
-                        Получить код
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
-          {step === 'code' && (
-            <Card className="border border-slate-200 bg-micro-gray">
-              <CardContent className="p-6 space-y-4">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-micro-green/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <Icon name="ShieldCheck" size={32} className="text-micro-green" />
-                  </div>
-                  <h3 className="font-semibold text-micro-dark mb-2">Введите код из SMS</h3>
-                  <p className="text-gray-600 text-sm">
-                    Код отправлен на номер <span className="font-medium">{phone}</span>
-                  </p>
-                  <Button 
-                    variant="link" 
-                    onClick={() => setStep('phone')}
-                    className="text-micro-blue p-0 h-auto"
-                  >
-                    Изменить номер
-                  </Button>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="code-input">Код подтверждения</Label>
-                    <Input
-                      id="code-input"
-                      type="text"
-                      placeholder="1234"
-                      value={code}
-                      onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                      className="rounded-md text-lg text-center tracking-widest"
-                      maxLength={4}
-                      autoFocus
-                    />
-                  </div>
-                  
-                  {countdown > 0 && (
-                    <div className="text-center">
-                      <Badge variant="secondary" className="bg-micro-light">
-                        <Icon name="Clock" size={14} className="mr-1" />
-                        Повторная отправка через {countdown}с
-                      </Badge>
-                    </div>
-                  )}
-                  
-                  {countdown === 0 && (
-                    <div className="text-center">
-                      <Button 
-                        variant="link" 
-                        onClick={handleResendCode}
-                        className="text-micro-blue"
-                      >
-                        <Icon name="RotateCcw" size={16} className="mr-2" />
-                        Отправить код повторно
-                      </Button>
-                    </div>
-                  )}
-                  
-                  {error && <p className="text-sm text-red-600 text-center">{error}</p>}
-                  <Button 
-                    onClick={handleVerifyCode}
-                    disabled={code.length !== 4 || isLoading}
-                    className="w-full bg-micro-green hover:bg-red-700 rounded-md py-3"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Icon name="Loader2" size={16} className="mr-2 animate-spin" />
-                        Проверяем код...
-                      </>
-                    ) : (
-                      <>
-                        <Icon name="LogIn" size={16} className="mr-2" />
-                        Войти в кабинет
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          
-          <div className="text-center text-sm text-gray-500">
-            <p>
-              Нажимая "Получить код", вы соглашаетесь с{' '}
-              <a href="#" className="text-micro-blue hover:underline">
-                условиями использования
-              </a>
-            </p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="text-center">
+            <div className="w-14 h-14 bg-micro-blue/10 rounded-lg flex items-center justify-center mx-auto mb-3">
+              <Icon name="Smartphone" size={28} className="text-micro-blue" />
+            </div>
+            <p className="text-gray-600 text-sm">Введите номер телефона, указанный в заявке</p>
           </div>
-        </div>
+
+          <div>
+            <Label htmlFor="phone-login">Номер телефона</Label>
+            <Input
+              id="phone-login"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              placeholder="+7 (999) 123-45-67"
+              value={phone}
+              onChange={(e) => setPhone(formatPhone(e.target.value))}
+              className="mt-2 h-12 text-base"
+            />
+          </div>
+
+          {error && <p className="text-sm text-micro-green text-center">{error}</p>}
+
+          <Button
+            type="submit"
+            disabled={phone.length < 18 || isLoading}
+            className="w-full h-12 bg-micro-blue hover:bg-blue-800 text-white text-base"
+          >
+            {isLoading ? 'Входим...' : 'Войти'}
+          </Button>
+        </form>
       </DialogContent>
     </Dialog>
   );
