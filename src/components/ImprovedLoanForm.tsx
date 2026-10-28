@@ -412,7 +412,7 @@ const ImprovedLoanForm: React.FC<ImprovedLoanFormProps> = ({
                 <Button
                   onClick={nextStep}
                   disabled={!isStepValid()}
-                  className="h-12 sm:h-10 flex-1 sm:flex-none bg-micro-blue hover:bg-blue-800 text-white flex items-center justify-center text-base sm:text-sm"
+                  className="h-12 sm:h-10 flex-1 sm:flex-none bg-micro-blue hover:bg-[#5A3DCC] text-white flex items-center justify-center text-base sm:text-sm"
                 >
                   Далее
                   <Icon name="ArrowRight" size={20} className="ml-2" />

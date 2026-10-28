@@ -103,7 +103,7 @@ const Login = ({ onDone }: { onDone: () => void }) => {
           <form onSubmit={submit} className="space-y-3">
             <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Пароль" className="h-12 text-base" />
             {error && <p className="text-sm text-micro-green">{error}</p>}
-            <Button type="submit" disabled={!password || loading} className="w-full h-12 bg-micro-blue hover:bg-blue-800 text-white">
+            <Button type="submit" disabled={!password || loading} className="w-full h-12 bg-micro-blue hover:bg-[#5A3DCC] text-white">
               Войти
             </Button>
           </form>
@@ -212,7 +212,7 @@ const Details = ({ id, onClose, onChanged }: { id: number; onClose: () => void; 
                   {d.phoneVerified ? 'Номер подтверждён' : 'Не подтверждён'}
                 </Badge>
               </div>
-              <a href={`tel:+7${d.phone}`} className="flex items-center justify-center gap-2 h-12 rounded-md bg-micro-blue hover:bg-blue-800 text-white font-semibold">
+              <a href={`tel:+7${d.phone}`} className="flex items-center justify-center gap-2 h-12 rounded-md bg-micro-blue hover:bg-[#5A3DCC] text-white font-semibold">
                 <Icon name="Phone" size={18} />
                 Позвонить +7{d.phone}
               </a>
@@ -334,7 +334,7 @@ const Details = ({ id, onClose, onChanged }: { id: number; onClose: () => void; 
               <h3 className="font-semibold text-micro-dark">Заметки сотрудников</h3>
               <div className="flex gap-2">
                 <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Добавить заметку" className="h-11 text-base" />
-                <Button onClick={addNote} disabled={!note.trim()} className="h-11 bg-micro-blue hover:bg-blue-800 text-white">Добавить</Button>
+                <Button onClick={addNote} disabled={!note.trim()} className="h-11 bg-micro-blue hover:bg-[#5A3DCC] text-white">Добавить</Button>
               </div>
               {d.notes.length === 0 && <p className="text-sm text-gray-500">Заметок пока нет</p>}
               {d.notes.map((n: any) => (

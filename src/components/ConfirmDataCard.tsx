@@ -68,7 +68,7 @@ const ConfirmDataCard: React.FC<Props> = ({ profile, phone, onDone }) => {
             </>
           ) : (
             <>
-              <Button disabled={busy || !comment.trim()} onClick={() => send('wrong')} className="flex-1 h-12 rounded-xl bg-micro-blue hover:bg-blue-800 text-white text-base">
+              <Button disabled={busy || !comment.trim()} onClick={() => send('wrong')} className="flex-1 h-12 rounded-xl bg-micro-blue hover:bg-[#5A3DCC] text-white text-base">
                 Отправить
               </Button>
               <Button disabled={busy} variant="outline" onClick={() => setWrong(false)} className="flex-1 h-12 rounded-xl text-base">

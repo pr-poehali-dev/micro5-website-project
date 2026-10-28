@@ -308,7 +308,7 @@ const ExtendedApplicationForm: React.FC<ExtendedApplicationFormProps> = ({
                 {currentStep < totalSteps ? (
                   <Button
                     onClick={handleNext}
-                    className="bg-micro-blue hover:bg-blue-800 rounded-md"
+                    className="bg-micro-blue hover:bg-[#5A3DCC] rounded-md"
                   >
                     Далее
                     <Icon name="ArrowRight" size={16} className="ml-2" />

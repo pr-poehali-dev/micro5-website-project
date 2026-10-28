@@ -63,7 +63,7 @@ const NewApplicationCard: React.FC<Props> = ({ firstLoan, onCreated }) => {
         </div>
 
         {error && <p className="text-sm text-micro-green">{error}</p>}
-        <Button onClick={submit} disabled={busy} className="w-full h-12 rounded-xl bg-micro-blue hover:bg-blue-800 text-white text-base">
+        <Button onClick={submit} disabled={busy} className="w-full h-12 rounded-xl bg-micro-blue hover:bg-[#5A3DCC] text-white text-base">
           Подать заявку
           <Icon name="ArrowRight" size={18} className="ml-2" />
         </Button>

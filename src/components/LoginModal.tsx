@@ -80,7 +80,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ children, onLogin }) => {
           <Button
             type="submit"
             disabled={phone.length < 18 || isLoading}
-            className="w-full h-12 bg-micro-blue hover:bg-blue-800 text-white text-base"
+            className="w-full h-12 bg-micro-blue hover:bg-[#5A3DCC] text-white text-base"
           >
             {isLoading ? 'Входим...' : 'Войти'}
           </Button>

@@ -266,7 +266,7 @@ const VideoVerification: React.FC<Props> = ({ video, onChanged }) => {
         {error && <p className="text-sm text-micro-green">{error}</p>}
 
         {!active && (
-          <Button onClick={startCamera} className="w-full h-12 rounded-xl bg-micro-blue hover:bg-blue-800 text-white text-base">
+          <Button onClick={startCamera} className="w-full h-12 rounded-xl bg-micro-blue hover:bg-[#5A3DCC] text-white text-base">
             <Icon name="Camera" size={18} className="mr-2" />
             {video?.status === 'rejected' ? 'Записать заново' : 'Пройти видеоидентификацию'}
           </Button>
@@ -318,7 +318,7 @@ const VideoVerification: React.FC<Props> = ({ video, onChanged }) => {
               </div>
             )}
             {phase === 'ready' && (
-              <Button onClick={record} className="w-full max-w-md mx-auto flex h-14 rounded-2xl bg-micro-blue hover:bg-blue-800 text-white text-lg">
+              <Button onClick={record} className="w-full max-w-md mx-auto flex h-14 rounded-2xl bg-micro-blue hover:bg-[#5A3DCC] text-white text-lg">
                 <Icon name="Video" size={20} className="mr-2" />
                 {issues.length ? 'Записать заново' : 'Начать запись'}
               </Button>

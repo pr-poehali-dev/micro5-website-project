@@ -113,7 +113,7 @@ const ApplicationSubmitted: React.FC<ApplicationSubmittedProps> = ({
 
             <Button 
               onClick={onContinue}
-              className="w-full bg-micro-blue hover:bg-blue-800 text-white py-4 rounded-lg text-lg font-semibold"
+              className="w-full bg-micro-blue hover:bg-[#5A3DCC] text-white py-4 rounded-lg text-lg font-semibold"
             >
               Отследить статус заявки
               <Icon name="ArrowRight" size={20} className="ml-2" />

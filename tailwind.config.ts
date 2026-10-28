@@ -18,6 +18,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				display: ['Unbounded', 'IBM Plex Sans', 'sans-serif']
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -26,10 +29,11 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				// МФО брендинг цвета
 				micro: {
-					blue: '#1D4ED8',
+					blue: '#6C4EE0',
 					green: '#DC2626',
-					gray: '#F5F8FF',
-					dark: '#0F1E4A',
+					gray: '#F4F2FF',
+					mint: '#2EE58A',
+					dark: '#1E1560',
 					light: '#FEF2F2'
 				},
 				primary: {

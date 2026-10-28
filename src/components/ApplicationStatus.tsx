@@ -301,7 +301,7 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ applicationId, on
                   Вы можете подать новую заявку через 30 дней.
                 </p>
                 <div className="flex gap-4 justify-center">
-                  <Button onClick={onBackToMain} className="bg-micro-blue hover:bg-blue-800 rounded-md">
+                  <Button onClick={onBackToMain} className="bg-micro-blue hover:bg-[#5A3DCC] rounded-md">
                     <Icon name="RotateCcw" size={16} className="mr-2" />
                     Попробовать снова
                   </Button>

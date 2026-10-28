@@ -108,7 +108,7 @@ const LoanSteps: React.FC<Props> = ({ loan, fullName, onChanged }) => {
           </ol>
 
           {!checking && (
-            <Button onClick={openSign} className="w-full h-12 rounded-xl bg-micro-blue hover:bg-blue-800 text-white text-base">
+            <Button onClick={openSign} className="w-full h-12 rounded-xl bg-micro-blue hover:bg-[#5A3DCC] text-white text-base">
               <Icon name="FileSignature" size={18} className="mr-2" />
               Подписать договор
             </Button>
@@ -146,7 +146,7 @@ const LoanSteps: React.FC<Props> = ({ loan, fullName, onChanged }) => {
           </div>
 
           {error && <p className="text-sm text-micro-green">{error}</p>}
-          <Button onClick={sign} disabled={code.length !== 6 || busy} className="w-full h-12 rounded-xl bg-micro-blue hover:bg-blue-800 text-white text-base">
+          <Button onClick={sign} disabled={code.length !== 6 || busy} className="w-full h-12 rounded-xl bg-micro-blue hover:bg-[#5A3DCC] text-white text-base">
             Подписать
           </Button>
           <Button variant="ghost" onClick={openSign} disabled={busy} className="w-full text-gray-600">Получить новый код</Button>

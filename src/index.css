@@ -1,8 +1,14 @@
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Unbounded:wght@500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+  .bg-brand-gradient {
+    background: linear-gradient(120deg, #3B2BA8 0%, #6C4EE0 28%, #4FA9FF 68%, #5BF08F 100%);
+  }
+}
 
 @layer base {
   :root {
@@ -15,7 +21,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 224 76% 40%;
+    --primary: 252 72% 58%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96.1%;
@@ -32,7 +38,7 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 224 76% 40%;
+    --ring: 252 72% 58%;
 
     --radius: 0.5rem;
 

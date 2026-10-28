@@ -107,7 +107,7 @@ const ActiveLoanCard: React.FC<Props> = ({ loan, onChanged }) => {
             </div>
           )}
           {error && <p className="text-sm text-micro-green">{error}</p>}
-          <Button onClick={confirm} disabled={busy} className="w-full h-12 rounded-xl bg-micro-blue hover:bg-blue-800 text-white text-base">
+          <Button onClick={confirm} disabled={busy} className="w-full h-12 rounded-xl bg-micro-blue hover:bg-[#5A3DCC] text-white text-base">
             {busy ? 'Обрабатываем...' : 'Подтвердить'}
           </Button>
         </DialogContent>

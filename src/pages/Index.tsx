@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
+import Logo from '@/components/Logo';
 import ChatWidget from '@/components/ChatWidget';
 import LoginModal from '@/components/LoginModal';
 import Dashboard from '@/components/Dashboard';
@@ -22,6 +23,7 @@ import { callCabinet, clearToken, getToken } from '@/lib/cabinetApi';
 const Index = () => {
   const [loanAmount, setLoanAmount] = useState([25000]);
   const [loanDays, setLoanDays] = useState([15]);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const [isLoggedIn, setIsLoggedIn] = useState(!!getToken());
   const [userPhone, setUserPhone] = useState('');
@@ -155,264 +157,169 @@ const Index = () => {
 
 
 
-  return (
-    <div className="min-h-screen bg-micro-gray">
-      {/* Header */}
-      <header className="bg-white border-b-2 border-micro-blue sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-micro-blue rounded-md flex items-center justify-center">
-                <span className="text-white font-bold text-lg">М5</span>
-              </div>
-              <span className="text-2xl font-semibold text-micro-dark">Микро5</span>
-            </div>
-            
-            <nav className="hidden md:flex items-center space-x-8">
-              <a href="#calculator" className="text-micro-dark hover:text-micro-blue transition-colors">Калькулятор</a>
-              <a href="/widget-generator" className="text-micro-dark hover:text-micro-blue transition-colors">Виджет</a>
-              <a href="#about" className="text-micro-dark hover:text-micro-blue transition-colors">О компании</a>
-              <a href="#contacts" className="text-micro-dark hover:text-micro-blue transition-colors">Контакты</a>
-              <Button variant="outline" className="rounded-md">
-                <Icon name="Phone" size={16} className="mr-2" />
-                Обратный звонок
-              </Button>
-              <LoginModal onLogin={handleLogin}>
-                <Button className="bg-micro-blue hover:bg-blue-800 rounded-md">
-                  <Icon name="User" size={16} className="mr-2" />
-                  Личный кабинет
-                </Button>
-              </LoginModal>
-            </nav>
+  const returnDate = new Date(Date.now() + loanDays[0] * 86400000).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
 
+  const steps = [
+    { title: 'Выберите срок и сумму займа', sub: 'на сайте или в приложении', text: 'Если вы уже брали деньги в Микро5, создайте новую заявку через личный кабинет.', img: 'https://cdn.poehali.dev/projects/e3537bf7-cb66-4f9a-9bc1-129fdca111a7/files/f7c07ff8-23bc-46f8-b40b-93f85031162e.jpg' },
+    { title: 'Заполните анкету', sub: 'как в паспорте', text: 'Укажите данные и пройдите короткую видеоидентификацию: достаточно 6 секунд.', icon: 'IdCard' },
+    { title: 'Подпишите договор', sub: 'по коду из уведомления', text: 'Условия займа видны заранее. Подпись занимает минуту.', icon: 'FileSignature' },
+    { title: 'Получите деньги', sub: 'на карту', text: 'После проверки договора займ становится активным, деньги уходят на вашу карту.', icon: 'Wallet' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-white text-micro-dark">
+      <header className="bg-brand-gradient sticky top-0 z-50">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <Logo />
+          <nav className="hidden md:flex items-center gap-8 text-white/90 text-sm">
+            <a href="#calculator" className="hover:text-white">Калькулятор</a>
+            <a href="#how" className="hover:text-white">Как получить</a>
+            <a href="#app" className="hover:text-white">Личный кабинет</a>
+            <a href="#contacts" className="hover:text-white">Контакты</a>
+          </nav>
+          <div className="flex items-center gap-3">
             <LoginModal onLogin={handleLogin}>
-              <Button className="md:hidden bg-micro-blue hover:bg-blue-800 text-white h-10">
-                <Icon name="User" size={16} className="mr-2" />
-                Войти
-              </Button>
+              <Button className="h-10 rounded-lg bg-micro-dark hover:bg-black text-white px-6 text-base font-medium">Войти</Button>
             </LoginModal>
+            <button className="md:hidden text-white" onClick={() => setMenuOpen(!menuOpen)} aria-label="Меню">
+              <Icon name={menuOpen ? 'X' : 'Menu'} size={28} />
+            </button>
           </div>
         </div>
+        {menuOpen && (
+          <div className="md:hidden bg-micro-dark/95 text-white px-4 py-3 space-y-3 text-base">
+            {[['#calculator', 'Калькулятор'], ['#how', 'Как получить заём'], ['#app', 'Личный кабинет'], ['#contacts', 'Контакты']].map(([h, t]) => (
+              <a key={h} href={h} onClick={() => setMenuOpen(false)} className="block py-1">{t}</a>
+            ))}
+          </div>
+        )}
+        <div className="bg-micro-dark/30 text-center text-white text-sm py-2">Быстрые онлайн-займы на карту</div>
       </header>
 
-      {/* Hero Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="animate-fade-in">
-              <Badge className="bg-micro-green/10 text-micro-green border-micro-green/20 mb-6">
-                Займы до 50 000 ₽
-              </Badge>
-              <h1 className="text-5xl lg:text-4xl lg:text-5xl font-semibold text-micro-dark mb-6 leading-tight">
-                Быстрые займы от
-                <span className="text-micro-blue whitespace-nowrap"> 1000 ₽</span>
-              </h1>
-              <p className="text-xl text-gray-600 mb-8">
-                Получите деньги на карту за 15 минут. Ставка всего 0.08% в день. 
-                Без справок и поручителей.
-              </p>
-              
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center">
-                  <Icon name="Clock" size={20} className="text-micro-green mr-2" />
-                  <span>15 минут на решение</span>
+      <section id="calculator" className="py-8 md:py-14">
+        <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-10 items-center">
+          <div className="text-center lg:text-left">
+            <h1 className="font-display font-bold text-3xl md:text-5xl leading-tight text-micro-blue">
+              Первый заём —<br /><span className="text-emerald-500">без процентов*</span>
+            </h1>
+            <p className="mt-5 text-gray-600 text-lg hidden lg:block">Деньги на карту за 15 минут. Без справок и поручителей, только паспорт и короткое видео.</p>
+            <div className="mt-6 hidden lg:flex flex-wrap gap-5 text-sm text-gray-700">
+              <span className="flex items-center gap-2"><Icon name="Clock" size={18} className="text-micro-blue" />15 минут на решение</span>
+              <span className="flex items-center gap-2"><Icon name="ShieldCheck" size={18} className="text-micro-blue" />Безопасно</span>
+              <span className="flex items-center gap-2"><Icon name="CreditCard" size={18} className="text-micro-blue" />На любую карту</span>
+            </div>
+          </div>
+
+          <div className="max-w-xl w-full mx-auto lg:mx-0 lg:ml-auto space-y-7">
+            <div>
+              <div className="flex items-end justify-between">
+                <Label className="text-gray-600 text-lg">Сумма</Label>
+                <span className="font-display font-semibold text-2xl md:text-3xl">{loanAmount[0].toLocaleString('ru-RU')} ₽</span>
+              </div>
+              <Slider value={loanAmount} onValueChange={setLoanAmount} max={50000} min={1000} step={500} className="mt-4 [&_[role=slider]]:h-8 [&_[role=slider]]:w-8 [&_[role=slider]]:border-4 [&_[role=slider]]:border-micro-blue [&_[role=slider]]:shadow-lg [&>span:first-child]:h-3 [&>span:first-child]:bg-gray-200 [&>span:first-child>span]:bg-micro-blue" />
+              <div className="flex justify-between text-gray-400 mt-2"><span>1 000 ₽</span><span>50 000 ₽</span></div>
+            </div>
+
+            <div>
+              <div className="flex items-end justify-between">
+                <Label className="text-gray-600 text-lg">Срок</Label>
+                <span className="font-display font-semibold text-2xl md:text-3xl">{loanDays[0]} {loanDays[0] % 10 === 1 && loanDays[0] !== 11 ? 'день' : [2, 3, 4].includes(loanDays[0] % 10) && ![12, 13, 14].includes(loanDays[0]) ? 'дня' : 'дней'}</span>
+              </div>
+              <Slider value={loanDays} onValueChange={setLoanDays} max={30} min={1} step={1} className="mt-4 [&_[role=slider]]:h-8 [&_[role=slider]]:w-8 [&_[role=slider]]:border-4 [&_[role=slider]]:border-micro-blue [&_[role=slider]]:shadow-lg [&>span:first-child]:h-3 [&>span:first-child]:bg-gray-200 [&>span:first-child>span]:bg-micro-blue" />
+              <div className="flex justify-between text-gray-400 mt-2"><span>1 день</span><span>30 дней</span></div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-medium">Возвращаете</span>
+                <div className="flex items-center gap-2 flex-wrap justify-end">
+                  <span className="rounded-lg bg-emerald-400 text-white font-bold px-2.5 py-1">0%</span>
+                  <span className="line-through text-gray-500">{Math.round(totalPayment).toLocaleString('ru-RU')} ₽</span>
+                  <span className="font-display font-semibold text-xl md:text-2xl text-micro-blue">{loanAmount[0].toLocaleString('ru-RU')} ₽</span>
                 </div>
-                <div className="flex items-center">
-                  <Icon name="Shield" size={20} className="text-micro-green mr-2" />
-                  <span>100% безопасно</span>
-                </div>
-                <div className="flex items-center">
-                  <Icon name="CreditCard" size={20} className="text-micro-green mr-2" />
-                  <span>На любую карту</span>
-                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-medium">До</span>
+                <span className="font-semibold">{returnDate}</span>
               </div>
             </div>
 
-            {/* Калькулятор займов */}
-            <Card className="animate-slide-up bg-white shadow-sm rounded-lg border border-slate-200">
-              <CardHeader className="text-center">
-                <CardTitle className="text-2xl text-micro-dark">Калькулятор займа</CardTitle>
-                <p className="text-gray-500">Рассчитайте выгодные условия</p>
-              </CardHeader>
-              <CardContent className="space-y-8">
-                <div>
-                  <div className="flex justify-between items-center mb-4">
-                    <Label className="text-micro-dark font-medium">Сумма займа</Label>
-                    <div className="text-right">
-                      <span className="text-2xl font-bold text-micro-blue">{loanAmount[0].toLocaleString()} ₽</span>
-                    </div>
-                  </div>
-                  <Slider
-                    value={loanAmount}
-                    onValueChange={setLoanAmount}
-                    max={50000}
-                    min={1000}
-                    step={500}
-                    className="[&>.slider-track]:bg-micro-blue/20 [&>.slider-range]:bg-micro-blue [&>.slider-thumb]:bg-micro-blue"
-                  />
-                  <div className="flex justify-between text-sm text-gray-500 mt-2">
-                    <span>1 000 ₽</span>
-                    <span>50 000 ₽</span>
-                  </div>
-                </div>
+            <Button onClick={handleStartApplication} className="w-full h-14 rounded-xl bg-micro-blue hover:bg-[#5A3DCC] text-white text-xl font-display font-medium">
+              Получить деньги
+            </Button>
 
-                <div>
-                  <div className="flex justify-between items-center mb-4">
-                    <Label className="text-micro-dark font-medium">Срок займа</Label>
-                    <div className="text-right">
-                      <span className="text-2xl font-bold text-micro-green">{loanDays[0]} дней</span>
-                    </div>
-                  </div>
-                  <Slider
-                    value={loanDays}
-                    onValueChange={setLoanDays}
-                    max={30}
-                    min={1}
-                    step={1}
-                    className="[&>.slider-track]:bg-micro-green/20 [&>.slider-range]:bg-micro-green [&>.slider-thumb]:bg-micro-green"
-                  />
-                  <div className="flex justify-between text-sm text-gray-500 mt-2">
-                    <span>1 день</span>
-                    <span>30 дней</span>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="bg-micro-gray rounded-lg p-6 space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Сумма займа:</span>
-                    <span className="font-semibold">{loanAmount[0].toLocaleString()} ₽</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Проценты:</span>
-                    <span className="font-semibold">{totalInterest.toFixed(0)} ₽</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Ставка в день:</span>
-                    <span className="font-semibold text-micro-green">0.08%</span>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between text-lg">
-                    <span className="font-bold">К возврату:</span>
-                    <span className="font-bold text-micro-blue">{totalPayment.toFixed(0)} ₽</span>
-                  </div>
-                </div>
-
-                <Button 
-                  className="w-full bg-micro-blue hover:bg-blue-800 text-white py-4 rounded-lg text-lg font-semibold"
-                  onClick={handleStartApplication}
-                >
-                  Получить займ
-                  <Icon name="ArrowRight" size={20} className="ml-2" />
-                </Button>
-              </CardContent>
-            </Card>
+            <div className="flex items-center justify-center gap-6 text-sm font-bold text-gray-500">
+              <span className="text-emerald-700 italic">МИР</span>
+              <span className="flex"><span className="w-6 h-6 rounded-full bg-red-500" /><span className="w-6 h-6 rounded-full bg-amber-400 -ml-2.5 opacity-90" /></span>
+              <span className="text-blue-800 italic font-extrabold text-lg">VISA</span>
+            </div>
+            <p className="text-xs text-gray-400 text-center">* Акция для новых клиентов. Далее ставка 0.08% в день.</p>
           </div>
         </div>
       </section>
 
-
-
-      {/* Преимущества */}
-      <section className="py-16 bg-micro-gray">
+      <section id="how" className="py-12 bg-white">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-semibold text-micro-dark mb-4">Почему выбирают Микро5</h2>
-            <p className="text-gray-600">Надежные займы с выгодными условиями</p>
+          <h2 className="font-display font-bold text-3xl md:text-4xl">Как получить заём</h2>
+          <p className="mt-4 text-lg text-micro-dark/80 max-w-xl">Чтобы оформить онлайн заём, вам нужно выполнить несколько простых действий:</p>
+          <div className="mt-8 flex gap-5 overflow-x-auto snap-x pb-6 -mx-4 px-4">
+            {steps.map((st, i) => (
+              <div key={st.title} className="snap-start shrink-0 w-[82%] sm:w-[360px] rounded-2xl bg-white shadow-[0_8px_30px_rgba(108,78,224,0.14)] p-6 flex flex-col">
+                <span className="text-sm font-semibold text-gray-400">Шаг {i + 1}</span>
+                <h3 className="mt-1 font-display font-bold text-2xl leading-snug">{st.title}</h3>
+                <p className="mt-3 font-display font-medium text-lg text-micro-blue">{st.sub}</p>
+                <div className="my-4 flex-1 flex items-center justify-center min-h-[140px]">
+                  {st.img ? <img src={st.img} alt="" className="h-40 w-40 object-contain" /> : (
+                    <div className="w-24 h-24 rounded-3xl bg-brand-gradient flex items-center justify-center">
+                      <Icon name={st.icon as string} size={44} className="text-white" />
+                    </div>
+                  )}
+                </div>
+                <p className="text-gray-600">{st.text}</p>
+              </div>
+            ))}
           </div>
+        </div>
+      </section>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="bg-white rounded-lg border border-slate-200 shadow-sm hover:border-micro-blue transition-shadow">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-micro-blue/10 rounded-lg flex items-center justify-center mx-auto mb-6">
-                  <Icon name="Zap" size={32} className="text-micro-blue" />
-                </div>
-                <h3 className="text-xl font-semibold text-micro-dark mb-4">Быстрое решение</h3>
-                <p className="text-gray-600">Рассматриваем заявки за 15 минут. Деньги поступают на карту моментально.</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white rounded-lg border border-slate-200 shadow-sm hover:border-micro-blue transition-shadow">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-micro-green/10 rounded-lg flex items-center justify-center mx-auto mb-6">
-                  <Icon name="Percent" size={32} className="text-micro-green" />
-                </div>
-                <h3 className="text-xl font-semibold text-micro-dark mb-4">Низкая ставка</h3>
-                <p className="text-gray-600">Всего 0.08% в день. Без скрытых комиссий и дополнительных платежей.</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white rounded-lg border border-slate-200 shadow-sm hover:border-micro-blue transition-shadow">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-6">
-                  <Icon name="FileText" size={32} className="text-red-600" />
-                </div>
-                <h3 className="text-xl font-semibold text-micro-dark mb-4">Без справок</h3>
-                <p className="text-gray-600">Только паспорт и видеоидентификация. Никаких справок о доходах.</p>
-              </CardContent>
-            </Card>
+      <section id="app" className="bg-brand-gradient text-white overflow-hidden">
+        <div className="container mx-auto px-4 pt-12 grid md:grid-cols-2 gap-6 items-center">
+          <div className="pb-6 md:pb-12">
+            <h2 className="font-display font-bold text-4xl md:text-5xl leading-tight">Управляйте займом в личном кабинете</h2>
+            <p className="mt-4 text-white/90 text-lg max-w-md">Подавайте заявки, подписывайте договор, погашайте и продлевайте заём с телефона.</p>
+            <LoginModal onLogin={handleLogin}>
+              <Button className="mt-7 h-14 rounded-xl bg-micro-dark hover:bg-black text-white text-lg px-8 font-display font-medium">
+                Войти в кабинет
+                <Icon name="ArrowRight" size={20} className="ml-3" />
+              </Button>
+            </LoginModal>
+          </div>
+          <div className="flex justify-center md:justify-end">
+            <img src="https://cdn.poehali.dev/projects/e3537bf7-cb66-4f9a-9bc1-129fdca111a7/files/4a9121bb-3ceb-441f-a400-aee970e3001f.jpg" alt="Личный кабинет Микро5" className="w-full max-w-md rounded-t-3xl object-cover" />
           </div>
         </div>
       </section>
 
       <ChatWidget />
 
-      {/* Footer */}
-      <footer className="bg-micro-dark text-white py-12 ">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-6">
-                <div className="w-10 h-10 bg-micro-blue rounded-md flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">М5</span>
-                </div>
-                <span className="text-2xl font-bold">Микро5</span>
-              </div>
-              <p className="text-gray-300">Надежные займы с выгодными условиями. Лицензия ЦБ РФ.</p>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Услуги</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><a href="#" className="hover:text-white transition-colors">Займы до 50 000 ₽</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Калькулятор займа</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Личный кабинет</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Компания</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><a href="#" className="hover:text-white transition-colors">О нас</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Контакты</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Лицензии</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Контакты</h4>
-              <div className="space-y-2 text-gray-300">
-                <div className="flex items-center">
-                  <Icon name="Phone" size={16} className="mr-2" />
-                  <span>8 (800) 555-35-35</span>
-                </div>
-                <div className="flex items-center">
-                  <Icon name="Mail" size={16} className="mr-2" />
-                  <span>info@micro5.ru</span>
-                </div>
-                <div className="flex items-center">
-                  <Icon name="Clock" size={16} className="mr-2" />
-                  <span>24/7</span>
-                </div>
-              </div>
+      <footer id="contacts" className="bg-micro-dark text-white/80 py-12">
+        <div className="container mx-auto px-4 space-y-8">
+          <div className="flex flex-wrap items-center gap-6">
+            <Logo />
+            <div className="flex items-center gap-3">
+              {['Phone', 'Mail', 'MessageCircle'].map((n) => (
+                <span key={n} className="w-12 h-12 rounded-full bg-slate-400/60 flex items-center justify-center text-white"><Icon name={n} size={22} /></span>
+              ))}
             </div>
           </div>
-          
-          <Separator className="my-8" />
-          
-          <div className="text-center text-gray-300">
-            <p>&copy; 2024 Микро5. Все права защищены.</p>
+          <div className="border-t border-white/25 pt-6 space-y-3 text-sm leading-relaxed">
+            <p className="text-lg text-white/70">© 2026, Микро5</p>
+            <div className="flex flex-wrap gap-x-8 gap-y-2">
+              <span className="flex items-center gap-2"><Icon name="Phone" size={16} />8 (800) 555-35-35</span>
+              <span className="flex items-center gap-2"><Icon name="Mail" size={16} />info@micro5.ru</span>
+              <span className="flex items-center gap-2"><Icon name="Clock" size={16} />Ежедневно, круглосуточно</span>
+            </div>
+            <p className="text-white/60">Сайт использует cookie для персонализации сервисов. Оставаясь на сайте, вы даёте согласие на обработку персональных данных.</p>
           </div>
         </div>
       </footer>

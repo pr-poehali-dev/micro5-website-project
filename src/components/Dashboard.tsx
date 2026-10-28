@@ -282,7 +282,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                   </div>
                   <div className="flex gap-2">
                     {loan.status === 'awaiting_sign' && (
-                      <Button onClick={() => setActiveTab('overview')} className="h-11 rounded-xl bg-micro-blue hover:bg-blue-800 text-white flex-1 sm:flex-none">
+                      <Button onClick={() => setActiveTab('overview')} className="h-11 rounded-xl bg-micro-blue hover:bg-[#5A3DCC] text-white flex-1 sm:flex-none">
                         Подписать
                       </Button>
                     )}
@@ -312,7 +312,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                       </div>
                     ))}
                     <div className="flex gap-3">
-                      <Button onClick={saveProfile} disabled={saving} className="flex-1 h-12 rounded-xl bg-micro-blue hover:bg-blue-800 text-white">Сохранить</Button>
+                      <Button onClick={saveProfile} disabled={saving} className="flex-1 h-12 rounded-xl bg-micro-blue hover:bg-[#5A3DCC] text-white">Сохранить</Button>
                       <Button variant="outline" onClick={() => setEditing(false)} className="flex-1 h-12">Отмена</Button>
                     </div>
                   </>
@@ -330,7 +330,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                         {profile.docsVerified ? 'Проверены' : 'На проверке'}
                       </Badge>
                     </div>
-                    <Button onClick={startEdit} className="w-full h-12 rounded-xl bg-micro-blue hover:bg-blue-800 text-white">
+                    <Button onClick={startEdit} className="w-full h-12 rounded-xl bg-micro-blue hover:bg-[#5A3DCC] text-white">
                       <Icon name="Pencil" size={16} className="mr-2" />
                       Обновить анкету
                     </Button>

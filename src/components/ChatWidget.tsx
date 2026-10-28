@@ -72,7 +72,7 @@ const ChatWidget: React.FC = () => {
           <Button
             onClick={() => setOpen(true)}
             aria-label="Открыть чат"
-            className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-micro-blue hover:bg-blue-800 shadow-lg"
+            className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-micro-blue hover:bg-[#5A3DCC] shadow-lg"
           >
             <Icon name="MessageCircle" size={26} />
           </Button>

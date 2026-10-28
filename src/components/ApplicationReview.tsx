@@ -220,7 +220,7 @@ const ApplicationReview: React.FC<ApplicationReviewProps> = ({
                 <div className="flex gap-4">
                   <Button 
                     onClick={onBackToMain}
-                    className="flex-1 bg-micro-blue hover:bg-blue-800 rounded-md"
+                    className="flex-1 bg-micro-blue hover:bg-[#5A3DCC] rounded-md"
                   >
                     На главную
                   </Button>
