@@ -414,6 +414,11 @@ def handler(event: dict, context) -> dict:
         cur.execute(f"INSERT INTO {SCHEMA}.client_documents (client_id, kind, url) VALUES ({cid}, {esc(kind)}, {esc(cdn_url(key))})")
         return resp(200, {'success': True, 'url': cdn_url(key)})
 
+    if action == 'video_code':
+        code = ''.join(secrets.choice('0123456789') for _ in range(4))
+        cur.execute(f"INSERT INTO {SCHEMA}.video_codes (client_id, code) VALUES ({cid}, {esc(code)})")
+        return resp(200, {'code': code})
+
     if action == 'upload_video':
         raw = body.get('data', '')
         if ',' in raw:
@@ -427,7 +432,10 @@ def handler(event: dict, context) -> dict:
         s3_client().put_object(Bucket='files', Key=key, Body=data, ContentType='video/mp4' if ext == 'mp4' else 'video/webm')
         auto_ok = 'TRUE' if body.get('autoOk') else 'FALSE'
         issues = str(body.get('autoIssues', ''))[:500]
-        cur.execute(f"INSERT INTO {SCHEMA}.video_checks (client_id, url, auto_ok, auto_issues) VALUES ({cid}, {esc(cdn_url(key))}, {auto_ok}, {esc(issues)})")
+        cur.execute(f"SELECT code FROM {SCHEMA}.video_codes WHERE client_id = {cid} ORDER BY id DESC LIMIT 1")
+        code_row = cur.fetchone()
+        code = code_row[0] if code_row else ''
+        cur.execute(f"INSERT INTO {SCHEMA}.video_checks (client_id, url, auto_ok, auto_issues, code) VALUES ({cid}, {esc(cdn_url(key))}, {auto_ok}, {esc(issues)}, {esc(code)})")
         notify(cur, cid, 'Видео отправлено оператору на проверку.')
         return resp(200, {'success': True})
 

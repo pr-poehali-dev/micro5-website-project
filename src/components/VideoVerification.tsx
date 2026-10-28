@@ -34,6 +34,7 @@ const VideoVerification: React.FC<Props> = ({ video, onChanged }) => {
   const [left, setLeft] = useState(DURATION);
   const [issues, setIssues] = useState<string[]>([]);
   const [error, setError] = useState('');
+  const [code, setCode] = useState('');
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -49,6 +50,15 @@ const VideoVerification: React.FC<Props> = ({ video, onChanged }) => {
   };
 
   useEffect(() => stopCamera, []);
+
+  useEffect(() => {
+    if (phase === 'idle' || phase === 'failed') return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [phase]);
 
   const checkFrame = (): string => {
     const v = videoRef.current;
@@ -98,6 +108,14 @@ const VideoVerification: React.FC<Props> = ({ video, onChanged }) => {
     setError('');
     setIssues([]);
     setPhase('preparing');
+    try {
+      const c = await callCabinet({ action: 'video_code' });
+      setCode(c.code);
+    } catch {
+      setError('Не удалось получить код. Проверьте интернет и попробуйте снова.');
+      setPhase('failed');
+      return;
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
@@ -226,6 +244,7 @@ const VideoVerification: React.FC<Props> = ({ video, onChanged }) => {
   const frameBad = phase === 'recording' && !!hint;
 
   return (
+    <>
     <Card className="rounded-2xl border-0 bg-white shadow-sm ring-1 ring-slate-100">
       <CardContent className="p-4 sm:p-5 space-y-4">
         <div className="flex items-start gap-3">
@@ -234,7 +253,7 @@ const VideoVerification: React.FC<Props> = ({ video, onChanged }) => {
           </div>
           <div>
             <p className="font-semibold text-micro-dark">Видеоидентификация</p>
-            <p className="text-sm text-gray-600">Запишите короткое видео лица, это займёт {DURATION} секунд</p>
+            <p className="text-sm text-gray-600">Запишите короткое видео лица и назовите код, это займёт {DURATION} секунд</p>
           </div>
         </div>
 
@@ -243,47 +262,6 @@ const VideoVerification: React.FC<Props> = ({ video, onChanged }) => {
             Оператор не принял видео{video.reason ? `: ${video.reason}` : ''}. Запишите его заново.
           </p>
         )}
-
-        <div className={active ? 'space-y-3' : 'hidden'}>
-          <div className="relative mx-auto w-full max-w-xs aspect-[3/4] rounded-3xl overflow-hidden bg-black">
-            <video ref={videoRef} playsInline muted className="absolute inset-0 w-full h-full object-cover -scale-x-100" />
-            <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 36% 30% at 50% 45%, transparent 98%, rgba(0,0,0,0.6) 100%)' }} />
-            <div className={`absolute left-1/2 top-[45%] -translate-x-1/2 -translate-y-1/2 w-[72%] h-[60%] rounded-[50%] border-4 pointer-events-none transition-colors ${phase === 'recording' ? (frameBad ? 'border-red-500' : 'border-emerald-400') : 'border-white/80'}`} />
-            {phase === 'recording' && (
-              <div className="absolute top-3 left-3 flex items-center gap-2 rounded-full bg-black/60 text-white text-sm px-3 py-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
-                {left} с
-              </div>
-            )}
-            {phase === 'preparing' && <div className="absolute inset-0 flex items-center justify-center text-white text-sm bg-black/50">Запускаем камеру...</div>}
-            {phase === 'sending' && <div className="absolute inset-0 flex items-center justify-center text-white text-sm bg-black/60">Отправляем оператору...</div>}
-          </div>
-
-          {(phase === 'ready' || phase === 'recording') && (
-            <p className={`text-center text-sm font-medium min-h-[20px] ${hint ? 'text-micro-green' : 'text-emerald-700'}`}>
-              {hint || 'Всё хорошо, лицо в рамке'}
-            </p>
-          )}
-
-          {issues.length > 0 && phase === 'ready' && (
-            <div className="rounded-xl bg-red-50 p-3 text-sm text-micro-green space-y-1">
-              <p className="font-semibold">Видео не отправлено. Что исправить:</p>
-              {issues.map((i) => <p key={i}>• {i}</p>)}
-            </div>
-          )}
-
-          <div className="flex flex-col gap-2 max-w-xs mx-auto">
-            {phase === 'ready' && (
-              <Button onClick={record} className="h-12 rounded-xl bg-micro-blue hover:bg-blue-800 text-white text-base">
-                <Icon name="Video" size={18} className="mr-2" />
-                {issues.length ? 'Записать заново' : 'Начать запись'}
-              </Button>
-            )}
-            {phase !== 'sending' && phase !== 'recording' && (
-              <Button variant="ghost" onClick={cancel} className="h-11 rounded-xl text-gray-600">Отмена</Button>
-            )}
-          </div>
-        </div>
 
         {error && <p className="text-sm text-micro-green">{error}</p>}
 
@@ -295,6 +273,60 @@ const VideoVerification: React.FC<Props> = ({ video, onChanged }) => {
         )}
       </CardContent>
     </Card>
+      {active && (
+        <div className="fixed inset-0 z-[100] bg-black">
+          <video ref={videoRef} playsInline muted className="absolute inset-0 w-full h-full object-cover -scale-x-100" />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 38% 32% at 50% 42%, transparent 96%, rgba(0,0,0,0.65) 100%)' }} />
+          <div className={`absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 w-[72vw] max-w-[360px] aspect-[3/4] max-h-[52vh] rounded-[50%] border-4 pointer-events-none transition-colors ${phase === 'recording' ? (frameBad ? 'border-red-500' : 'border-emerald-400') : 'border-white/80'}`} />
+
+          <div className="absolute top-0 inset-x-0 p-4 flex items-start justify-between gap-3 bg-gradient-to-b from-black/70 to-transparent">
+            <div className="text-white">
+              <p className="text-xs text-white/70">Назовите вслух код</p>
+              <p className="text-4xl font-bold tracking-[0.3em]">{code}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              {phase === 'recording' && (
+                <div className="flex items-center gap-2 rounded-full bg-black/60 text-white text-sm px-3 py-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+                  {left} с
+                </div>
+              )}
+              {phase !== 'sending' && phase !== 'recording' && (
+                <button onClick={cancel} aria-label="Закрыть" className="w-11 h-11 rounded-full bg-white/20 text-white flex items-center justify-center">
+                  <Icon name="X" size={22} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {phase === 'preparing' && <div className="absolute inset-0 flex items-center justify-center text-white bg-black/50">Запускаем камеру...</div>}
+          {phase === 'sending' && <div className="absolute inset-0 flex items-center justify-center text-white bg-black/70">Отправляем оператору...</div>}
+
+          <div className="absolute bottom-0 inset-x-0 p-4 pb-8 bg-gradient-to-t from-black/80 to-transparent space-y-3">
+            {(phase === 'ready' || phase === 'recording') && (
+              <p className={`text-center text-base font-semibold ${hint ? 'text-red-300' : 'text-emerald-300'}`}>
+                {hint || (phase === 'recording' ? 'Отлично, продолжайте' : 'Лицо в рамке, можно начинать')}
+              </p>
+            )}
+            {phase === 'ready' && !issues.length && (
+              <p className="text-center text-sm text-white/80">Нажмите «Начать запись» и чётко произнесите код {code}</p>
+            )}
+            {issues.length > 0 && phase === 'ready' && (
+              <div className="rounded-xl bg-red-600/90 p-3 text-sm text-white space-y-1 max-w-md mx-auto">
+                <p className="font-semibold">Видео не отправлено. Что исправить:</p>
+                {issues.map((i) => <p key={i}>• {i}</p>)}
+              </div>
+            )}
+            {phase === 'ready' && (
+              <Button onClick={record} className="w-full max-w-md mx-auto flex h-14 rounded-2xl bg-micro-blue hover:bg-blue-800 text-white text-lg">
+                <Icon name="Video" size={20} className="mr-2" />
+                {issues.length ? 'Записать заново' : 'Начать запись'}
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

@@ -253,6 +253,11 @@ const Details = ({ id, onClose, onChanged }: { id: number; onClose: () => void; 
                 <>
                   <video src={d.video.url} controls playsInline className="w-full max-h-96 rounded-md bg-black" />
                   <p className="text-xs text-gray-500">Записано {d.video.createdAt}</p>
+                  {d.video.code && (
+                    <p className="text-sm rounded-md bg-micro-gray p-3">
+                      Код, который клиент должен назвать на видео: <span className="font-bold tracking-widest text-micro-dark">{d.video.code}</span>
+                    </p>
+                  )}
                   <p className={`text-sm rounded-md p-3 ${d.video.autoIssues ? 'bg-amber-50 text-amber-800' : 'bg-emerald-50 text-emerald-700'}`}>
                     {d.video.autoIssues ? `Автопроверка: ${d.video.autoIssues}` : 'Автопроверка: лицо в кадре видно чётко, одно лицо, по центру'}
                   </p>

@@ -94,9 +94,9 @@ def handler(event: dict, context) -> dict:
         loans = cur.fetchone()
         cur.execute(f"SELECT kind, url, status, reject_reason FROM {SCHEMA}.client_documents WHERE client_id = {data['clientId']}")
         data['documents'] = {d[0]: {'url': d[1], 'status': d[2], 'reason': d[3]} for d in cur.fetchall()}
-        cur.execute(f"SELECT id, url, auto_ok, auto_issues, status, reject_reason, created_at FROM {SCHEMA}.video_checks WHERE client_id = {data['clientId']} ORDER BY id DESC LIMIT 1")
+        cur.execute(f"SELECT id, url, auto_ok, auto_issues, status, reject_reason, created_at, code FROM {SCHEMA}.video_checks WHERE client_id = {data['clientId']} ORDER BY id DESC LIMIT 1")
         v = cur.fetchone()
-        data['video'] = {'id': v[0], 'url': v[1], 'autoOk': v[2], 'autoIssues': v[3], 'status': v[4], 'reason': v[5], 'createdAt': str(v[6])[:16]} if v else None
+        data['video'] = {'id': v[0], 'url': v[1], 'autoOk': v[2], 'autoIssues': v[3], 'status': v[4], 'reason': v[5], 'createdAt': str(v[6])[:16], 'code': v[7]} if v else None
         cur.execute(f"SELECT id, result, comment, created_at FROM {SCHEMA}.call_log WHERE application_id = {app_id} ORDER BY id DESC")
         data['calls'] = [{'id': c[0], 'result': c[1], 'comment': c[2], 'createdAt': str(c[3])[:16]} for c in cur.fetchall()]
         data['loansCount'] = loans[0]
