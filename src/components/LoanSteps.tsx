@@ -101,7 +101,7 @@ const LoanSteps: React.FC<Props> = ({ loan, fullName, onChanged }) => {
             <p>Заёмщик: {fullName || '—'}</p>
             <p>Сумма займа: {loan.amount.toLocaleString()} ₽</p>
             <p>Срок: {loan.days} дн.</p>
-            <p>Ставка: 0.08% в день</p>
+            <p>Ставка: {loan.returnAmount === loan.amount ? '0% (акция для первого займа)' : '0.08% в день'}</p>
             <p>Сумма к возврату: {loan.returnAmount.toLocaleString()} ₽</p>
             <p>Заимодавец перечисляет сумму займа на банковскую карту заёмщика. Заёмщик возвращает сумму займа и проценты в срок, указанный в договоре.</p>
           </div>

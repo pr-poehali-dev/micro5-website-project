@@ -10,6 +10,7 @@ import ActiveLoanCard from '@/components/ActiveLoanCard';
 import DocumentsUpload from '@/components/DocumentsUpload';
 import NewApplicationCard from '@/components/NewApplicationCard';
 import ApplicationStatusCard from '@/components/ApplicationStatusCard';
+import PromoBanner from '@/components/PromoBanner';
 import ConfirmDataCard from '@/components/ConfirmDataCard';
 import NotificationsBell, { NotificationItem } from '@/components/NotificationsBell';
 
@@ -181,6 +182,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
+            <PromoBanner available={canReapply} onApply={() => document.getElementById('new-application')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} />
+
             {confirmRequested && <ConfirmDataCard profile={profile} phone={phoneText} onDone={reload} />}
 
             {pendingLoans.map((loan) => (
@@ -195,7 +198,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
 
             {!docsDone && <DocumentsUpload documents={documents} onChanged={reload} />}
 
-            {canReapply && <NewApplicationCard onCreated={reload} />}
+            {canReapply && <div id="new-application"><NewApplicationCard firstLoan={loans.length === 0} onCreated={reload} /></div>}
 
             <div className="grid grid-cols-2 gap-3">
               {[['Взято всего', totalBorrowed, 'TrendingUp', 'bg-blue-50 text-micro-blue'], ['Выплачено всего', totalPaid, 'CircleCheck', 'bg-emerald-50 text-emerald-600']].map(([label, value, icon, tone]) => (

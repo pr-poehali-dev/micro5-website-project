@@ -6,18 +6,19 @@ import Icon from '@/components/ui/icon';
 import { callCabinet } from '@/lib/cabinetApi';
 
 interface Props {
+  firstLoan?: boolean;
   onCreated: () => void;
 }
 
 const RATE = 0.0008;
 
-const NewApplicationCard: React.FC<Props> = ({ onCreated }) => {
+const NewApplicationCard: React.FC<Props> = ({ firstLoan, onCreated }) => {
   const [amount, setAmount] = useState([15000]);
   const [days, setDays] = useState([14]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
-  const total = Math.round(amount[0] * (1 + RATE * days[0]));
+  const total = firstLoan ? amount[0] : Math.round(amount[0] * (1 + RATE * days[0]));
 
   const submit = async () => {
     setBusy(true);
@@ -55,6 +56,7 @@ const NewApplicationCard: React.FC<Props> = ({ onCreated }) => {
           <Slider value={days} onValueChange={setDays} min={1} max={30} step={1} />
         </div>
 
+        {firstLoan && <p className="text-sm font-semibold text-emerald-700">Первый займ под 0%: переплаты нет</p>}
         <div className="flex justify-between rounded-md bg-micro-gray p-3 text-sm">
           <span className="text-gray-600">К возврату</span>
           <span className="font-semibold">{total.toLocaleString()} ₽</span>

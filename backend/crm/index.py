@@ -166,7 +166,8 @@ def handler(event: dict, context) -> dict:
         if new_status == 'approved':
             cur.execute(f"INSERT INTO {SCHEMA}.notifications (client_id, text) VALUES ({a[0]}, 'Заявка одобрена. Подпишите договор, чтобы получить деньги.')")
             amount, days = a[1], a[2]
-            return_amount = round(amount * (1 + DAILY_RATE * days))
+            cur.execute(f"SELECT COUNT(*) FROM {SCHEMA}.loans WHERE client_id = {a[0]}")
+            return_amount = amount if cur.fetchone()[0] == 0 else round(amount * (1 + DAILY_RATE * days))
             cur.execute(f"""INSERT INTO {SCHEMA}.loans (client_id, application_id, amount, return_amount, days, status, due_date)
                 VALUES ({a[0]}, {app_id}, {amount}, {return_amount}, {days}, 'awaiting_sign', CURRENT_DATE + {int(days)})""")
         return resp(200, {'success': True, 'status': new_status})

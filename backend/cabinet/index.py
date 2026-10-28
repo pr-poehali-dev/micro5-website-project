@@ -58,7 +58,7 @@ def build_contract(loan, prof):
         '',
         f"Сумма займа: {loan['amount']:,} ₽".replace(',', ' '),
         f"Срок займа: {loan['days']} дн.",
-        "Процентная ставка: 0.08% в день",
+        "Процентная ставка: " + ("0% (акция для первого займа)" if loan['returnAmount'] == loan['amount'] else "0.08% в день"),
         f"Сумма к возврату: {loan['returnAmount']:,} ₽".replace(',', ' '),
         f"Дата возврата: {loan['dueDate']}",
         '',
