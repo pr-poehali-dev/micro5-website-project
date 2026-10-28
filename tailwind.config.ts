@@ -26,11 +26,11 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				// МФО брендинг цвета
 				micro: {
-					blue: '#2563EB',
-					green: '#10B981',
-					gray: '#F8FAFC',
-					dark: '#1E293B',
-					light: '#F1F5F9'
+					blue: '#1D4ED8',
+					green: '#DC2626',
+					gray: '#F5F8FF',
+					dark: '#0F1E4A',
+					light: '#FEF2F2'
 				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',

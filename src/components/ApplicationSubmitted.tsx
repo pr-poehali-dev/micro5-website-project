@@ -85,7 +85,7 @@ const ApplicationSubmitted: React.FC<ApplicationSubmittedProps> = ({
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-4 bg-green-50 rounded-xl border border-green-200">
+              <div className="text-center p-4 bg-red-50 rounded-xl border border-red-200">
                 <Icon name="Phone" size={24} className="text-micro-green mx-auto mb-2" />
                 <h4 className="font-semibold text-micro-dark text-sm">Звонок оператора</h4>
                 <p className="text-gray-600 text-xs">При одобрении</p>
@@ -113,7 +113,7 @@ const ApplicationSubmitted: React.FC<ApplicationSubmittedProps> = ({
 
             <Button 
               onClick={onContinue}
-              className="w-full bg-micro-blue hover:bg-blue-600 text-white py-4 rounded-2xl text-lg font-semibold"
+              className="w-full bg-micro-blue hover:bg-blue-800 text-white py-4 rounded-2xl text-lg font-semibold"
             >
               Отследить статус заявки
               <Icon name="ArrowRight" size={20} className="ml-2" />

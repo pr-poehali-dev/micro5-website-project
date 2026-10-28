@@ -384,7 +384,7 @@ const ImprovedLoanForm: React.FC<ImprovedLoanFormProps> = ({
                 <Button
                   onClick={nextStep}
                   disabled={!isStepValid()}
-                  className="bg-micro-blue hover:bg-blue-600 text-white flex items-center"
+                  className="bg-micro-blue hover:bg-blue-800 text-white flex items-center"
                 >
                   Далее
                   <Icon name="ArrowRight" size={20} className="ml-2" />
@@ -393,7 +393,7 @@ const ImprovedLoanForm: React.FC<ImprovedLoanFormProps> = ({
                 <Button
                   onClick={handleSubmit}
                   disabled={!isStepValid()}
-                  className="bg-micro-green hover:bg-green-600 text-white flex items-center"
+                  className="bg-micro-green hover:bg-red-700 text-white flex items-center"
                 >
                   Отправить заявку
                   <Icon name="Send" size={20} className="ml-2" />

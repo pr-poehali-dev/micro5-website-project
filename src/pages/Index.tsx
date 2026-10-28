@@ -173,7 +173,7 @@ const Index = () => {
                 Обратный звонок
               </Button>
               <LoginModal onLogin={handleLogin}>
-                <Button className="bg-micro-blue hover:bg-blue-600 rounded-full">
+                <Button className="bg-micro-blue hover:bg-blue-800 rounded-full">
                   <Icon name="User" size={16} className="mr-2" />
                   Личный кабинет
                 </Button>
@@ -292,7 +292,7 @@ const Index = () => {
                 </div>
 
                 <Button 
-                  className="w-full bg-micro-blue hover:bg-blue-600 text-white py-4 rounded-2xl text-lg font-semibold"
+                  className="w-full bg-micro-blue hover:bg-blue-800 text-white py-4 rounded-2xl text-lg font-semibold"
                   onClick={handleStartApplication}
                 >
                   Получить займ
@@ -337,8 +337,8 @@ const Index = () => {
 
             <Card className="bg-white rounded-3xl border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Icon name="FileText" size={32} className="text-purple-600" />
+                <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Icon name="FileText" size={32} className="text-red-600" />
                 </div>
                 <h3 className="text-xl font-semibold text-micro-dark mb-4">Без справок</h3>
                 <p className="text-gray-600">Только паспорт и видеоидентификация. Никаких справок о доходах.</p>
@@ -350,7 +350,7 @@ const Index = () => {
 
       {/* Чат-бот */}
       <div className="fixed bottom-6 right-6 z-50">
-        <Button className="w-16 h-16 rounded-full bg-micro-blue hover:bg-blue-600 shadow-lg animate-bounce-soft">
+        <Button className="w-16 h-16 rounded-full bg-micro-blue hover:bg-blue-800 shadow-lg animate-bounce-soft">
           <Icon name="MessageCircle" size={24} />
         </Button>
       </div>

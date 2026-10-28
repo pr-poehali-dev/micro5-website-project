@@ -127,7 +127,7 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ applicationId, on
         return {
           title: 'Проверяем документы',
           message: 'Анализируем загруженные документы с помощью ИИ-алгоритмов.',
-          color: 'bg-purple-600'
+          color: 'bg-red-600'
         };
       case 'approval':
         return {
@@ -279,7 +279,7 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ applicationId, on
                   Ваша заявка одобрена! Деньги будут переведены на указанную карту в течение 15 минут.
                 </p>
                 <div className="flex gap-4 justify-center">
-                  <Button className="bg-micro-green hover:bg-green-600 rounded-xl">
+                  <Button className="bg-micro-green hover:bg-red-700 rounded-xl">
                     <Icon name="CreditCard" size={16} className="mr-2" />
                     Получить деньги
                   </Button>
@@ -301,7 +301,7 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({ applicationId, on
                   Вы можете подать новую заявку через 30 дней.
                 </p>
                 <div className="flex gap-4 justify-center">
-                  <Button onClick={onBackToMain} className="bg-micro-blue hover:bg-blue-600 rounded-xl">
+                  <Button onClick={onBackToMain} className="bg-micro-blue hover:bg-blue-800 rounded-xl">
                     <Icon name="RotateCcw" size={16} className="mr-2" />
                     Попробовать снова
                   </Button>

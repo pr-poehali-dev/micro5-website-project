@@ -55,7 +55,7 @@ const WidgetGenerator: React.FC = () => {
                   </div>
                   
                   <div className="flex items-start gap-3">
-                    <Icon name="Palette" size={20} className="text-purple-500 mt-1" />
+                    <Icon name="Palette" size={20} className="text-red-500 mt-1" />
                     <div>
                       <h4 className="font-semibold">Настраиваемый дизайн</h4>
                       <p className="text-sm text-gray-600">
@@ -65,7 +65,7 @@ const WidgetGenerator: React.FC = () => {
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <Icon name="Smartphone" size={20} className="text-green-500 mt-1" />
+                    <Icon name="Smartphone" size={20} className="text-red-500 mt-1" />
                     <div>
                       <h4 className="font-semibold">Мобильная адаптация</h4>
                       <p className="text-sm text-gray-600">

@@ -247,7 +247,7 @@ const ApplicationRejected: React.FC<ApplicationRejectedProps> = ({
               {canApplyAgain ? (
                 <Button 
                   onClick={onNewApplication}
-                  className="w-full bg-micro-green hover:bg-green-600 text-white py-4 rounded-2xl text-lg font-semibold"
+                  className="w-full bg-micro-green hover:bg-red-700 text-white py-4 rounded-2xl text-lg font-semibold"
                 >
                   Подать новую заявку
                   <Icon name="Plus" size={20} className="ml-2" />

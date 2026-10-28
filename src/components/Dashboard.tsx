@@ -79,13 +79,13 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-micro-green text-white';
+      case 'active': return 'bg-micro-blue text-white';
       case 'overdue': return 'bg-red-500 text-white';
-      case 'paid': return 'bg-gray-500 text-white';
+      case 'paid': return 'bg-slate-500 text-white';
       case 'pending': return 'bg-yellow-500 text-white';
-      case 'approved': return 'bg-micro-green text-white';
+      case 'approved': return 'bg-micro-blue text-white';
       case 'rejected': return 'bg-red-500 text-white';
-      case 'processing': return 'bg-micro-blue text-white';
+      case 'processing': return 'bg-blue-400 text-white';
       default: return 'bg-gray-500 text-white';
     }
   };
@@ -111,20 +111,20 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
     <div className="min-h-screen bg-gradient-to-br from-micro-gray via-white to-micro-light">
       {/* Header */}
       <header className="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-2">
             <div className="flex items-center space-x-4">
               <div className="w-10 h-10 bg-micro-blue rounded-xl flex items-center justify-center">
                 <span className="text-white font-bold text-lg">М5</span>
               </div>
               <div>
-                <span className="text-2xl font-bold text-micro-dark">Личный кабинет</span>
+                <span className="text-lg sm:text-2xl font-bold text-micro-dark">Личный кабинет</span>
                 <p className="text-sm text-gray-600">{userPhone}</p>
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" className="rounded-full">
+            <div className="flex items-center space-x-1 sm:space-x-4">
+              <Button variant="outline" className="rounded-full hidden sm:inline-flex">
                 <Icon name="Phone" size={16} className="mr-2" />
                 Поддержка
               </Button>
@@ -133,36 +133,44 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                 onClick={onLogout}
                 className="rounded-full text-gray-600"
               >
-                <Icon name="LogOut" size={16} className="mr-2" />
-                Выйти
+                <Icon name="LogOut" size={16} className="sm:mr-2" />
+                <span className="hidden sm:inline">Выйти</span>
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 pb-24 sm:pb-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 bg-white rounded-2xl p-1 shadow-lg">
-            <TabsTrigger value="overview" className="rounded-xl data-[state=active]:bg-micro-blue data-[state=active]:text-white">
-              <Icon name="LayoutDashboard" size={16} className="mr-2" />
+          <TabsList className="grid w-full grid-cols-5 h-auto bg-white rounded-2xl p-1 shadow-lg fixed bottom-2 left-2 right-2 z-50 w-auto sm:static sm:w-full">
+            <TabsTrigger value="overview" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-xl data-[state=active]:bg-micro-blue data-[state=active]:text-white">
+              <Icon name="LayoutDashboard" size={18} className="sm:mr-2" />
               Обзор
             </TabsTrigger>
-            <TabsTrigger value="loans" className="rounded-xl data-[state=active]:bg-micro-blue data-[state=active]:text-white">
-              <Icon name="CreditCard" size={16} className="mr-2" />
+            <TabsTrigger value="loans" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-xl data-[state=active]:bg-micro-blue data-[state=active]:text-white">
+              <Icon name="CreditCard" size={18} className="sm:mr-2" />
               Займы
             </TabsTrigger>
-            <TabsTrigger value="applications" className="rounded-xl data-[state=active]:bg-micro-blue data-[state=active]:text-white">
-              <Icon name="FileText" size={16} className="mr-2" />
+            <TabsTrigger value="applications" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-xl data-[state=active]:bg-micro-blue data-[state=active]:text-white">
+              <Icon name="FileText" size={18} className="sm:mr-2" />
               Заявки
+            </TabsTrigger>
+            <TabsTrigger value="contracts" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-xl data-[state=active]:bg-micro-blue data-[state=active]:text-white">
+              <Icon name="FileSignature" size={18} className="sm:mr-2" />
+              Договоры
+            </TabsTrigger>
+            <TabsTrigger value="profile" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-xl data-[state=active]:bg-micro-blue data-[state=active]:text-white">
+              <Icon name="UserRound" size={18} className="sm:mr-2" />
+              Анкета
             </TabsTrigger>
           </TabsList>
 
           {/* Обзор */}
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid md:grid-cols-3 gap-6">
-              <Card className="bg-gradient-to-br from-micro-blue to-blue-600 text-white rounded-3xl border-0">
-                <CardContent className="p-6">
+            <div className="grid md:grid-cols-3 gap-4 sm:gap-4 sm:p-6">
+              <Card className="bg-gradient-to-br from-micro-blue to-blue-800 text-white rounded-3xl border-0">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4">
                     <Icon name="Wallet" size={24} />
                     <Badge className="bg-white/20 text-white">Активный займ</Badge>
@@ -176,25 +184,25 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-micro-green to-green-600 text-white rounded-3xl border-0">
-                <CardContent className="p-6">
+              <Card className="bg-gradient-to-br from-micro-green to-red-600 text-white rounded-3xl border-0">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4">
                     <Icon name="TrendingUp" size={24} />
                     <Badge className="bg-white/20 text-white">Всего займов</Badge>
                   </div>
                   <h3 className="text-2xl font-bold mb-1">{totalBorrowed.toLocaleString()} ₽</h3>
-                  <p className="text-green-100">Общая сумма займов</p>
+                  <p className="text-red-100">Общая сумма займов</p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-3xl border-0">
-                <CardContent className="p-6">
+              <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white rounded-3xl border-0">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4">
                     <Icon name="CheckCircle" size={24} />
                     <Badge className="bg-white/20 text-white">Погашено</Badge>
                   </div>
                   <h3 className="text-2xl font-bold mb-1">{totalPaid.toLocaleString()} ₽</h3>
-                  <p className="text-purple-100">Выплачено всего</p>
+                  <p className="text-red-100">Выплачено всего</p>
                 </CardContent>
               </Card>
             </div>
@@ -245,8 +253,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                     <Progress value={(30 - activeLoan.daysLeft) / 30 * 100} className="h-2" />
                   </div>
 
-                  <div className="flex gap-4">
-                    <Button className="flex-1 bg-micro-green hover:bg-green-600 rounded-xl">
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button className="flex-1 bg-micro-green hover:bg-red-700 rounded-xl">
                       <Icon name="CreditCard" size={16} className="mr-2" />
                       Погасить займ
                     </Button>
@@ -270,7 +278,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                 <p className="text-gray-600 mb-6">
                   Получите займ до 50 000 ₽ на срок до 30 дней
                 </p>
-                <Button className="w-full bg-micro-blue hover:bg-blue-600 rounded-xl py-3">
+                <Button className="w-full bg-micro-blue hover:bg-blue-800 rounded-xl py-3">
                   <Icon name="Calculator" size={16} className="mr-2" />
                   Рассчитать займ
                 </Button>
@@ -283,7 +291,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
             <div className="space-y-4">
               {loans.map((loan) => (
                 <Card key={loan.id} className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-shadow">
-                  <CardContent className="p-6">
+                  <CardContent className="p-4 sm:p-6">
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <h3 className="font-semibold text-lg">{loan.id}</h3>
@@ -313,8 +321,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
 
                     {loan.status === 'active' && (
                       <div className="mt-4 pt-4 border-t border-gray-200">
-                        <div className="flex gap-4">
-                          <Button size="sm" className="bg-micro-green hover:bg-green-600 rounded-xl">
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <Button size="sm" className="bg-micro-green hover:bg-red-700 rounded-xl">
                             Погасить
                           </Button>
                           <Button size="sm" variant="outline" className="rounded-xl">
@@ -337,7 +345,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
             <div className="space-y-4">
               {applications.map((app) => (
                 <Card key={app.id} className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-shadow">
-                  <CardContent className="p-6">
+                  <CardContent className="p-4 sm:p-6">
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <h3 className="font-semibold text-lg">{app.id}</h3>
@@ -367,7 +375,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
 
                     {app.status === 'approved' && (
                       <div className="mt-4 pt-4 border-t border-gray-200">
-                        <Button size="sm" className="bg-micro-blue hover:bg-blue-600 rounded-xl">
+                        <Button size="sm" className="bg-micro-blue hover:bg-blue-800 rounded-xl">
                           <Icon name="Download" size={14} className="mr-2" />
                           Получить деньги
                         </Button>
@@ -377,6 +385,57 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                 </Card>
               ))}
             </div>
+          </TabsContent>
+
+          <TabsContent value="contracts" className="space-y-4">
+            {loans.map((loan) => (
+              <Card key={loan.id} className="rounded-3xl border-0 shadow-lg">
+                <CardContent className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-micro-light flex items-center justify-center">
+                      <Icon name="FileText" size={22} className="text-micro-green" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">Договор займа {loan.id}</p>
+                      <p className="text-sm text-gray-600">{loan.amount.toLocaleString()} ₽, до {new Date(loan.dueDate).toLocaleDateString('ru-RU')}</p>
+                    </div>
+                  </div>
+                  <Button variant="outline" className="rounded-xl w-full sm:w-auto">
+                    <Icon name="Download" size={16} className="mr-2" />
+                    Скачать
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </TabsContent>
+
+          <TabsContent value="profile" className="space-y-4">
+            <Card className="rounded-3xl border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Icon name="UserRound" size={20} className="mr-2 text-micro-blue" />
+                  Моя анкета
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between gap-4">
+                  <span className="text-gray-600">Телефон</span>
+                  <span className="font-semibold">{userPhone}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-gray-600">Статус анкеты</span>
+                  <Badge className="bg-micro-blue text-white">Заполнена</Badge>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-gray-600">Документы</span>
+                  <Badge className="bg-micro-blue text-white">Проверены</Badge>
+                </div>
+                <Button className="w-full bg-micro-blue hover:bg-blue-800 rounded-xl">
+                  <Icon name="Pencil" size={16} className="mr-2" />
+                  Обновить анкету
+                </Button>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

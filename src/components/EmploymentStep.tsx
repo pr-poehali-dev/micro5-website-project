@@ -23,8 +23,8 @@ const EmploymentStep: React.FC<EmploymentStepProps> = ({
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
-        <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <Icon name="Briefcase" size={32} className="text-green-600" />
+        <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Icon name="Briefcase" size={32} className="text-red-600" />
         </div>
         <h3 className="text-xl font-semibold text-micro-dark">Занятость и доходы</h3>
       </div>

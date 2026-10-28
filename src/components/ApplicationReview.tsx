@@ -161,7 +161,7 @@ const ApplicationReview: React.FC<ApplicationReviewProps> = ({
                     На главную
                   </Button>
                   <Button 
-                    className="flex-1 bg-micro-green hover:bg-green-600 rounded-xl"
+                    className="flex-1 bg-micro-green hover:bg-red-700 rounded-xl"
                   >
                     <Icon name="Phone" size={16} className="mr-2" />
                     Перезвонить мне
@@ -220,7 +220,7 @@ const ApplicationReview: React.FC<ApplicationReviewProps> = ({
                 <div className="flex gap-4">
                   <Button 
                     onClick={onBackToMain}
-                    className="flex-1 bg-micro-blue hover:bg-blue-600 rounded-xl"
+                    className="flex-1 bg-micro-blue hover:bg-blue-800 rounded-xl"
                   >
                     На главную
                   </Button>

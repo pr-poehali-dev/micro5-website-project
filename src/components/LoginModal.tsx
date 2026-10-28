@@ -126,7 +126,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ children, onLogin }) => {
                   <Button 
                     onClick={handleSendCode}
                     disabled={phone.length < 18 || isLoading}
-                    className="w-full bg-micro-blue hover:bg-blue-600 rounded-xl py-3"
+                    className="w-full bg-micro-blue hover:bg-blue-800 rounded-xl py-3"
                   >
                     {isLoading ? (
                       <>
@@ -205,7 +205,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ children, onLogin }) => {
                   <Button 
                     onClick={handleVerifyCode}
                     disabled={code.length !== 4 || isLoading}
-                    className="w-full bg-micro-green hover:bg-green-600 rounded-xl py-3"
+                    className="w-full bg-micro-green hover:bg-red-700 rounded-xl py-3"
                   >
                     {isLoading ? (
                       <>

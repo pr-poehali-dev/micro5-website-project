@@ -308,7 +308,7 @@ const ExtendedApplicationForm: React.FC<ExtendedApplicationFormProps> = ({
                 {currentStep < totalSteps ? (
                   <Button
                     onClick={handleNext}
-                    className="bg-micro-blue hover:bg-blue-600 rounded-xl"
+                    className="bg-micro-blue hover:bg-blue-800 rounded-xl"
                   >
                     Далее
                     <Icon name="ArrowRight" size={16} className="ml-2" />
@@ -317,7 +317,7 @@ const ExtendedApplicationForm: React.FC<ExtendedApplicationFormProps> = ({
                   <Button
                     onClick={handleSubmit}
                     disabled={isLoading || !formData.documents.passport}
-                    className="bg-micro-green hover:bg-green-600 rounded-xl"
+                    className="bg-micro-green hover:bg-red-700 rounded-xl"
                   >
                     {isLoading ? (
                       <>
