@@ -109,6 +109,8 @@ const Index = () => {
       <ImprovedLoanForm
         loanAmount={loanAmount[0]}
         loanDays={loanDays[0]}
+        onAmountChange={(v) => setLoanAmount([v])}
+        onDaysChange={(v) => setLoanDays([v])}
         onSubmit={handleFormSubmit}
         onBack={handleBackToMain}
       />

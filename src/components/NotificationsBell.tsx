@@ -28,10 +28,10 @@ const NotificationsBell: React.FC<Props> = ({ items, onRead }) => {
 
   return (
     <>
-      <button onClick={() => toggle(true)} aria-label="Уведомления" className="relative p-2 rounded-md hover:bg-slate-100">
-        <Icon name="Bell" size={22} className="text-micro-dark" />
+      <button onClick={() => toggle(true)} aria-label="Уведомления" className="relative p-2 rounded-md hover:bg-white/15">
+        <Icon name="Bell" size={22} className="text-white" />
         {unread > 0 && (
-          <span className="absolute top-0.5 right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-micro-green text-white text-[11px] font-semibold flex items-center justify-center">
+          <span className="absolute top-0.5 right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[11px] font-semibold flex items-center justify-center">
             {unread}
           </span>
         )}

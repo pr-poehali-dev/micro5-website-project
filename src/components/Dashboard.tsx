@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
+import Logo from '@/components/Logo';
 import LoanSteps from '@/components/LoanSteps';
 import ActiveLoanCard from '@/components/ActiveLoanCard';
 import DocumentsUpload from '@/components/DocumentsUpload';
@@ -153,23 +154,26 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
   const phoneText = profile.phone ? '+7' + profile.phone : userPhone;
 
   return (
-    <div className="min-h-screen bg-micro-gray">
-      <header className="bg-white/80 backdrop-blur border-b border-slate-100 sticky top-0 z-40">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-11 h-11 shrink-0 rounded-full bg-gradient-to-br from-micro-blue to-micro-dark text-white flex items-center justify-center font-semibold">
+    <div className="min-h-screen bg-[#F6F5FF]">
+      <header className="bg-brand-gradient sticky top-0 z-40">
+        <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
+          <Logo />
+          <div className="flex items-center gap-1 text-white">
+            <NotificationsBell items={notifications} onRead={reload} />
+            <Button variant="ghost" onClick={onLogout} className="text-white hover:bg-white/15 hover:text-white px-2 rounded-xl" aria-label="Выйти">
+              <Icon name="LogOut" size={20} />
+            </Button>
+          </div>
+        </div>
+        <div className="bg-micro-dark/30">
+          <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3 text-white">
+            <div className="w-10 h-10 shrink-0 rounded-full bg-white/20 flex items-center justify-center font-display font-semibold">
               {(profile.fullName || 'М').trim().charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="text-xs text-gray-500 leading-none">{greeting}</p>
-              <p className="font-semibold text-micro-dark truncate">{firstName}</p>
+              <p className="text-xs text-white/75 leading-none">{greeting}</p>
+              <p className="font-display font-semibold truncate">{firstName}</p>
             </div>
-          </div>
-          <div className="flex items-center gap-1">
-            <NotificationsBell items={notifications} onRead={reload} />
-            <Button variant="ghost" onClick={onLogout} className="text-gray-600 px-2 rounded-xl" aria-label="Выйти">
-              <Icon name="LogOut" size={20} />
-            </Button>
           </div>
         </div>
       </header>

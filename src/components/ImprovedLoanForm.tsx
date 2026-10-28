@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
+import Logo from '@/components/Logo';
 
 interface FormData {
   fullName: string;
@@ -25,412 +24,232 @@ interface FormData {
   agreedToDataProcessing: boolean;
 }
 
-interface ImprovedLoanFormProps {
+interface Props {
   loanAmount: number;
   loanDays: number;
+  onAmountChange: (v: number) => void;
+  onDaysChange: (v: number) => void;
   onSubmit: (formData: FormData) => void;
   onBack: () => void;
 }
 
-const ImprovedLoanForm: React.FC<ImprovedLoanFormProps> = ({
-  loanAmount,
-  loanDays,
-  onSubmit,
-  onBack
-}) => {
+interface FieldProps {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  hint?: string;
+  type?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
+  autoComplete?: string;
+  maxLength?: number;
+  required?: boolean;
+}
+
+const Field: React.FC<FieldProps> = ({ label, value, onChange, hint, type = 'text', inputMode, autoComplete, maxLength, required = true }) => {
+  const lifted = type === 'date' || !!value;
+  return (
+    <div>
+      <label className="relative block rounded-lg bg-[#F4F5F7] focus-within:ring-2 focus-within:ring-micro-blue/40">
+        <span className={`pointer-events-none absolute left-4 text-gray-500 transition-all ${lifted ? 'top-2 text-xs' : 'top-1/2 -translate-y-1/2 text-base'}`}>
+          {label}{required && <span className="text-red-500"> *</span>}
+        </span>
+        <input
+          type={type}
+          value={value}
+          inputMode={inputMode}
+          autoComplete={autoComplete}
+          maxLength={maxLength}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-[68px] w-full rounded-lg bg-transparent px-4 pt-6 pb-1 text-base text-micro-dark outline-none"
+        />
+      </label>
+      {hint && <p className="mt-1.5 text-xs text-gray-600">{hint}</p>}
+    </div>
+  );
+};
+
+const SelectField: React.FC<{ label: string; value: string; onChange: (v: string) => void; options: [string, string][] }> = ({ label, value, onChange, options }) => (
+  <Select value={value} onValueChange={onChange}>
+    <SelectTrigger className="h-[68px] w-full rounded-lg border border-slate-300 bg-white px-4 text-left [&>span]:line-clamp-none">
+      <div className="text-left">
+        <span className="block text-xs text-gray-500">{label} <span className="text-red-500">*</span></span>
+        <span className="block text-base text-micro-dark"><SelectValue placeholder="Выберите..." /></span>
+      </div>
+    </SelectTrigger>
+    <SelectContent>
+      {options.map(([v, t]) => <SelectItem key={v} value={v}>{t}</SelectItem>)}
+    </SelectContent>
+  </Select>
+);
+
+const formatPhone = (value: string) => {
+  let d = value.replace(/\D/g, '');
+  if (d.startsWith('7') || d.startsWith('8')) d = d.slice(1);
+  d = d.slice(0, 10);
+  if (!d) return '';
+  let r = '+7 (' + d.slice(0, 3);
+  if (d.length >= 3) r += ')';
+  if (d.length > 3) r += ' ' + d.slice(3, 6);
+  if (d.length > 6) r += '-' + d.slice(6, 8);
+  if (d.length > 8) r += '-' + d.slice(8, 10);
+  return r;
+};
+
+const SLIDER_CLS = 'mt-4 [&_[role=slider]]:h-8 [&_[role=slider]]:w-8 [&_[role=slider]]:border-4 [&_[role=slider]]:border-micro-blue [&_[role=slider]]:shadow-lg [&>span:first-child]:h-3 [&>span:first-child]:bg-[#D3D5F0] [&>span:first-child>span]:bg-micro-blue';
+
+const dayWord = (n: number) => (n % 10 === 1 && n !== 11 ? 'день' : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n) ? 'дня' : 'дней');
+
+const ImprovedLoanForm: React.FC<Props> = ({ loanAmount, loanDays, onAmountChange, onDaysChange, onSubmit, onBack }) => {
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState<FormData>({
-    fullName: '',
-    phone: '',
-    email: '',
-    birthDate: '',
-    passportSeries: '',
-    passportNumber: '',
-    passportDate: '',
-    passportIssuer: '',
-    address: '',
-    income: '',
-    employment: '',
-    cardNumber: '',
-    cardBank: '',
-    agreedToTerms: false,
-    agreedToDataProcessing: false
+  const [surname, setSurname] = useState('');
+  const [name, setName] = useState('');
+  const [patronymic, setPatronymic] = useState('');
+  const [citizenship, setCitizenship] = useState('Российская Федерация');
+  const [region, setRegion] = useState('');
+  const [data, setData] = useState<FormData>({
+    fullName: '', phone: '', email: '', birthDate: '', passportSeries: '', passportNumber: '', passportDate: '',
+    passportIssuer: '', address: '', income: '', employment: '', cardNumber: '', cardBank: '',
+    agreedToTerms: false, agreedToDataProcessing: false,
   });
 
-  const formatPhone = (value: string) => {
-    let d = value.replace(/\D/g, '');
-    if (d.startsWith('7') || d.startsWith('8')) d = d.slice(1);
-    d = d.slice(0, 10);
-    if (!d) return '';
-    let r = '+7 (' + d.slice(0, 3);
-    if (d.length >= 3) r += ')';
-    if (d.length > 3) r += ' ' + d.slice(3, 6);
-    if (d.length > 6) r += '-' + d.slice(6, 8);
-    if (d.length > 8) r += '-' + d.slice(8, 10);
-    return r;
+  const set = (field: keyof FormData, value: string | boolean) => setData((p) => ({ ...p, [field]: value }));
+
+  const interest = Math.round((loanAmount * 0.08 * loanDays) / 100);
+  const returnDate = new Date(Date.now() + loanDays * 86400000).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  const valid = () => {
+    if (step === 1) return surname && name && patronymic && data.phone.length >= 18 && data.birthDate && region && data.email.includes('@');
+    if (step === 2) return data.passportSeries.length === 4 && data.passportNumber.length === 6 && data.passportDate && data.passportIssuer;
+    if (step === 3) return data.address && data.income && data.employment;
+    return data.cardNumber && data.cardBank && data.agreedToTerms && data.agreedToDataProcessing;
   };
 
-  const updateFormData = (field: keyof FormData, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const nextStep = () => {
-    if (step < 4) setStep(step + 1);
-  };
-
-  const prevStep = () => {
-    if (step > 1) setStep(step - 1);
-  };
-
-  const handleSubmit = () => {
-    onSubmit(formData);
-  };
-
-  const isStepValid = () => {
-    switch (step) {
-      case 1:
-        return formData.fullName && formData.phone && formData.email && formData.birthDate;
-      case 2:
-        return formData.passportSeries && formData.passportNumber && formData.passportDate && formData.passportIssuer;
-      case 3:
-        return formData.address && formData.income && formData.employment;
-      case 4:
-        return formData.cardNumber && formData.cardBank && formData.agreedToTerms && formData.agreedToDataProcessing;
-      default:
-        return false;
+  const next = () => {
+    if (step < 4) {
+      setStep(step + 1);
+      window.scrollTo({ top: 0 });
+      return;
     }
+    onSubmit({ ...data, fullName: [surname, name, patronymic].join(' ').trim(), address: [region, data.address].filter(Boolean).join(', ') });
   };
 
-  const steps = [
-    { number: 1, title: 'Личные данные', icon: 'User' },
-    { number: 2, title: 'Паспортные данные', icon: 'CreditCard' },
-    { number: 3, title: 'Работа и доходы', icon: 'Briefcase' },
-    { number: 4, title: 'Банковская карта', icon: 'Wallet' }
-  ];
+  const back = () => {
+    if (step === 1) onBack();
+    else setStep(step - 1);
+  };
+
+  const titles = ['Заполните анкету', 'Паспортные данные', 'Работа и доходы', 'Карта для получения денег'];
 
   return (
-    <div className="min-h-screen bg-micro-gray py-3 sm:py-8">
-      <div className="container mx-auto px-3 sm:px-4 max-w-4xl">
-        <Button 
-          variant="ghost" 
-          onClick={onBack}
-          className="mb-3 sm:mb-6 -ml-2 text-micro-blue hover:bg-blue-50"
-        >
-          <Icon name="ArrowLeft" size={20} className="mr-2" />
-          <span className="sm:hidden">Назад</span><span className="hidden sm:inline">Вернуться к калькулятору</span>
+    <div className="min-h-screen bg-white text-micro-dark">
+      <header className="sticky top-0 z-40 bg-white">
+        <div className="mx-auto max-w-xl px-4 pt-3 flex items-center justify-between">
+          <button onClick={back} className="flex items-center gap-1 text-micro-blue" aria-label="Назад">
+            <Icon name="ChevronLeft" size={24} />
+            <Logo tone="dark" />
+          </button>
+          <span className="text-sm text-micro-blue">Шаг {step} из 4</span>
+        </div>
+        <div className="mx-auto max-w-xl px-4 mt-3 grid grid-cols-4 gap-2">
+          {[1, 2, 3, 4].map((n) => (
+            <div key={n} className={`h-1.5 rounded-full ${n <= step ? 'bg-micro-blue' : 'bg-gray-200'}`} />
+          ))}
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-xl px-4 pb-10">
+        <section className="py-5 space-y-6 border-b-[10px] border-[#F1F1F5] -mx-4 px-4">
+          <div>
+            <div className="flex items-end justify-between">
+              <span className="text-gray-600">Сумма</span>
+              <span className="font-display font-semibold text-2xl">{loanAmount.toLocaleString('ru-RU')} ₽</span>
+            </div>
+            <Slider value={[loanAmount]} onValueChange={(v) => onAmountChange(v[0])} min={1000} max={50000} step={500} className={SLIDER_CLS} />
+            <div className="mt-2 flex justify-between text-sm text-gray-400"><span>1 000 ₽</span><span>50 000 ₽</span></div>
+          </div>
+          <div>
+            <div className="flex items-end justify-between">
+              <span className="text-gray-600">Срок</span>
+              <span className="font-display font-semibold text-2xl">{loanDays} {dayWord(loanDays)}</span>
+            </div>
+            <Slider value={[loanDays]} onValueChange={(v) => onDaysChange(v[0])} min={1} max={30} step={1} className={SLIDER_CLS} />
+            <div className="mt-2 flex justify-between text-sm text-gray-400"><span>1 день</span><span>30 дней</span></div>
+          </div>
+          <div className="space-y-3 border-t border-slate-200 pt-4">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-medium">Возвращаете</span>
+              <div className="flex items-center gap-2">
+                <span className="rounded-md bg-emerald-400 px-2 py-0.5 text-sm font-bold text-white">0%</span>
+                <span className="text-gray-600 line-through">{(loanAmount + interest).toLocaleString('ru-RU')} ₽</span>
+                <span className="font-display font-semibold text-micro-blue">{loanAmount.toLocaleString('ru-RU')} ₽</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="font-medium">До</span>
+              <span className="text-sm font-medium">{returnDate}</span>
+            </div>
+          </div>
+        </section>
+
+        <h2 className="mt-5 mb-4 font-display text-2xl font-semibold">{titles[step - 1]}</h2>
+
+        <div className="space-y-3">
+          {step === 1 && (
+            <>
+              <Field label="Мобильный телефон" type="tel" inputMode="tel" autoComplete="tel" value={data.phone} onChange={(v) => set('phone', formatPhone(v))} hint="На указанный номер будет отправлено подтверждающее СМС" />
+              <Field label="Фамилия" autoComplete="family-name" value={surname} onChange={setSurname} />
+              <Field label="Имя" autoComplete="given-name" value={name} onChange={setName} />
+              <Field label="Отчество" autoComplete="additional-name" value={patronymic} onChange={setPatronymic} />
+              <Field label="Дата рождения" type="date" value={data.birthDate} onChange={(v) => set('birthDate', v)} />
+              <SelectField label="Гражданство" value={citizenship} onChange={setCitizenship} options={[['Российская Федерация', 'Российская Федерация'], ['Республика Беларусь', 'Республика Беларусь'], ['Республика Казахстан', 'Республика Казахстан']]} />
+              <Field label="Регион проживания" autoComplete="address-level1" value={region} onChange={setRegion} />
+              <Field label="Электронная почта" type="email" inputMode="email" autoComplete="email" value={data.email} onChange={(v) => set('email', v)} hint="Укажите корректный email, он необходим для получения договора и документов об оплате" />
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <Field label="Серия паспорта" inputMode="numeric" maxLength={4} value={data.passportSeries} onChange={(v) => set('passportSeries', v.replace(/\D/g, ''))} />
+              <Field label="Номер паспорта" inputMode="numeric" maxLength={6} value={data.passportNumber} onChange={(v) => set('passportNumber', v.replace(/\D/g, ''))} />
+              <Field label="Дата выдачи" type="date" value={data.passportDate} onChange={(v) => set('passportDate', v)} />
+              <Field label="Кем выдан" value={data.passportIssuer} onChange={(v) => set('passportIssuer', v)} />
+            </>
+          )}
+
+          {step === 3 && (
+            <>
+              <Field label="Адрес регистрации" autoComplete="street-address" value={data.address} onChange={(v) => set('address', v)} hint="Улица, дом, квартира" />
+              <SelectField label="Трудовая деятельность" value={data.employment} onChange={(v) => set('employment', v)} options={[['employed', 'Работаю по найму'], ['business', 'Собственный бизнес'], ['freelance', 'Фриланс'], ['pension', 'Пенсионер'], ['student', 'Студент'], ['unemployed', 'Не работаю']]} />
+              <SelectField label="Ежемесячный доход" value={data.income} onChange={(v) => set('income', v)} options={[['0-20000', 'До 20 000 ₽'], ['20000-40000', '20 000 - 40 000 ₽'], ['40000-60000', '40 000 - 60 000 ₽'], ['60000-100000', '60 000 - 100 000 ₽'], ['100000+', 'Свыше 100 000 ₽']]} />
+            </>
+          )}
+
+          {step === 4 && (
+            <>
+              <Field label="Номер карты" inputMode="numeric" autoComplete="cc-number" maxLength={19} value={data.cardNumber} onChange={(v) => set('cardNumber', v.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim())} hint="Деньги будут отправлены на эту карту" />
+              <SelectField label="Банк" value={data.cardBank} onChange={(v) => set('cardBank', v)} options={[['sberbank', 'Сбербанк'], ['vtb', 'ВТБ'], ['gazprombank', 'Газпромбанк'], ['alfabank', 'Альфа-Банк'], ['tinkoff', 'Т-Банк'], ['raiffeisen', 'Райффайзенбанк'], ['other', 'Другой банк']]} />
+              <label className="flex items-start gap-3 pt-3 text-sm">
+                <Checkbox checked={data.agreedToTerms} onCheckedChange={(c) => set('agreedToTerms', !!c)} className="mt-0.5" />
+                <span>Я согласен с условиями займа и публичной офертой</span>
+              </label>
+              <label className="flex items-start gap-3 text-sm">
+                <Checkbox checked={data.agreedToDataProcessing} onCheckedChange={(c) => set('agreedToDataProcessing', !!c)} className="mt-0.5" />
+                <span>Я согласен на обработку персональных данных</span>
+              </label>
+            </>
+          )}
+        </div>
+
+        <Button onClick={next} disabled={!valid()} className="mt-5 h-16 w-full rounded-lg bg-micro-blue text-xl font-display font-medium text-white hover:bg-[#5A3DCC] disabled:opacity-50">
+          {step < 4 ? 'Продолжить' : 'Отправить заявку'}
         </Button>
-
-        <Card className="bg-white shadow-md rounded-lg sm:rounded-lg border border-slate-200">
-          <CardHeader className="text-center p-4 pb-4 sm:p-6 sm:pb-8">
-            <CardTitle className="text-2xl sm:text-3xl text-micro-dark mb-1 sm:mb-2">Анкета на займ</CardTitle>
-            <p className="text-gray-500">
-              Займ {loanAmount.toLocaleString()} ₽ на {loanDays} дней
-            </p>
-          </CardHeader>
-
-          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-            <div className="sm:hidden mb-5">
-              <div className="flex justify-between items-baseline mb-2">
-                <span className="text-sm font-semibold text-micro-blue">Шаг {step} из 4</span>
-                <span className="text-sm text-gray-600">{steps[step - 1].title}</span>
-              </div>
-              <div className="h-2 rounded-full bg-gray-200 overflow-hidden">
-                <div className="h-full bg-micro-blue rounded-full transition-all" style={{ width: `${step * 25}%` }} />
-              </div>
-            </div>
-
-            <div className="hidden sm:flex justify-between mb-8">
-              {steps.map((stepItem, index) => (
-                <div key={stepItem.number} className="flex flex-col items-center flex-1">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all ${
-                    step >= stepItem.number 
-                      ? 'bg-micro-blue border-micro-blue text-white' 
-                      : 'border-gray-300 text-gray-400'
-                  }`}>
-                    <Icon name={stepItem.icon as any} size={20} />
-                  </div>
-                  <span className={`text-sm mt-2 text-center ${
-                    step >= stepItem.number ? 'text-micro-blue font-medium' : 'text-gray-400'
-                  }`}>
-                    {stepItem.title}
-                  </span>
-                  {index < steps.length - 1 && (
-                    <div className={`absolute h-0.5 w-16 mt-6 ml-16 ${
-                      step > stepItem.number ? 'bg-micro-blue' : 'bg-gray-300'
-                    }`} />
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Step 1: Personal Data */}
-            {step === 1 && (
-              <div className="space-y-4 sm:space-y-6">
-                <h3 className="text-lg sm:text-xl font-semibold text-micro-dark mb-4 sm:mb-6">Личная информация</h3>
-                
-                <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
-                  <div>
-                    <Label htmlFor="fullName">ФИО полностью *</Label>
-                    <Input
-                      id="fullName"
-                      autoComplete="name"
-                      value={formData.fullName}
-                      onChange={(e) => updateFormData('fullName', e.target.value)}
-                      placeholder="Иванов Иван Иванович"
-                      className="mt-2 h-12 text-base"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="birthDate">Дата рождения *</Label>
-                    <Input
-                      id="birthDate"
-                      type="date"
-                      value={formData.birthDate}
-                      onChange={(e) => updateFormData('birthDate', e.target.value)}
-                      className="mt-2 h-12 text-base"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
-                  <div>
-                    <Label htmlFor="phone">Мобильный телефон *</Label>
-                    <Input
-                      id="phone"
-                      type="tel" inputMode="tel" autoComplete="tel"
-                      value={formData.phone}
-                      onChange={(e) => updateFormData('phone', formatPhone(e.target.value))}
-                      placeholder="+7 (999) 123-45-67"
-                      className="mt-2 h-12 text-base"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="email">Email адрес *</Label>
-                    <Input
-                      id="email"
-                      type="email" inputMode="email" autoComplete="email"
-                      value={formData.email}
-                      onChange={(e) => updateFormData('email', e.target.value)}
-                      placeholder="example@email.com"
-                      className="mt-2 h-12 text-base"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 2: Passport Data */}
-            {step === 2 && (
-              <div className="space-y-4 sm:space-y-6">
-                <h3 className="text-lg sm:text-xl font-semibold text-micro-dark mb-4 sm:mb-6">Паспортные данные</h3>
-                
-                <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
-                  <div>
-                    <Label htmlFor="passportSeries">Серия паспорта *</Label>
-                    <Input
-                      id="passportSeries"
-                      inputMode="numeric"
-                      value={formData.passportSeries}
-                      onChange={(e) => updateFormData('passportSeries', e.target.value.replace(/\D/g, ''))}
-                      placeholder="1234"
-                      maxLength={4}
-                      className="mt-2 h-12 text-base"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="passportNumber">Номер паспорта *</Label>
-                    <Input
-                      id="passportNumber"
-                      inputMode="numeric"
-                      value={formData.passportNumber}
-                      onChange={(e) => updateFormData('passportNumber', e.target.value.replace(/\D/g, ''))}
-                      placeholder="567890"
-                      maxLength={6}
-                      className="mt-2 h-12 text-base"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="passportDate">Дата выдачи паспорта *</Label>
-                  <Input
-                    id="passportDate"
-                    type="date"
-                    value={formData.passportDate}
-                    onChange={(e) => updateFormData('passportDate', e.target.value)}
-                    className="mt-2 h-12 text-base"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="passportIssuer">Кем выдан *</Label>
-                  <Input
-                    id="passportIssuer"
-                    value={formData.passportIssuer}
-                    onChange={(e) => updateFormData('passportIssuer', e.target.value)}
-                    placeholder="ОТДЕЛОМ УФМС РОССИИ..."
-                    className="mt-2 h-12 text-base"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Step 3: Employment Data */}
-            {step === 3 && (
-              <div className="space-y-4 sm:space-y-6">
-                <h3 className="text-lg sm:text-xl font-semibold text-micro-dark mb-4 sm:mb-6">Работа и доходы</h3>
-                
-                <div>
-                  <Label htmlFor="address">Адрес регистрации *</Label>
-                  <Input
-                    id="address"
-                      autoComplete="street-address"
-                    value={formData.address}
-                    onChange={(e) => updateFormData('address', e.target.value)}
-                    placeholder="г. Москва, ул. Примерная, д. 1, кв. 1"
-                    className="mt-2 h-12 text-base"
-                  />
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
-                  <div>
-                    <Label htmlFor="employment">Трудовая деятельность *</Label>
-                    <Select value={formData.employment} onValueChange={(value) => updateFormData('employment', value)}>
-                      <SelectTrigger className="mt-2 h-12 text-base">
-                        <SelectValue placeholder="Выберите..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="employed">Работаю по найму</SelectItem>
-                        <SelectItem value="business">Собственный бизнес</SelectItem>
-                        <SelectItem value="freelance">Фриланс</SelectItem>
-                        <SelectItem value="pension">Пенсионер</SelectItem>
-                        <SelectItem value="student">Студент</SelectItem>
-                        <SelectItem value="unemployed">Не работаю</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="income">Ежемесячный доход *</Label>
-                    <Select value={formData.income} onValueChange={(value) => updateFormData('income', value)}>
-                      <SelectTrigger className="mt-2 h-12 text-base">
-                        <SelectValue placeholder="Выберите..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0-20000">До 20 000 ₽</SelectItem>
-                        <SelectItem value="20000-40000">20 000 - 40 000 ₽</SelectItem>
-                        <SelectItem value="40000-60000">40 000 - 60 000 ₽</SelectItem>
-                        <SelectItem value="60000-100000">60 000 - 100 000 ₽</SelectItem>
-                        <SelectItem value="100000+">Свыше 100 000 ₽</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 4: Bank Card */}
-            {step === 4 && (
-              <div className="space-y-4 sm:space-y-6">
-                <h3 className="text-lg sm:text-xl font-semibold text-micro-dark mb-4 sm:mb-6">Банковская карта для получения займа</h3>
-                
-                <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
-                  <div>
-                    <Label htmlFor="cardNumber">Номер карты *</Label>
-                    <Input
-                      id="cardNumber"
-                      inputMode="numeric" autoComplete="cc-number"
-                      value={formData.cardNumber}
-                      onChange={(e) => updateFormData('cardNumber', e.target.value)}
-                      placeholder="1234 5678 9012 3456"
-                      className="mt-2 h-12 text-base"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="cardBank">Банк *</Label>
-                    <Select value={formData.cardBank} onValueChange={(value) => updateFormData('cardBank', value)}>
-                      <SelectTrigger className="mt-2 h-12 text-base">
-                        <SelectValue placeholder="Выберите банк..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="sberbank">Сбербанк</SelectItem>
-                        <SelectItem value="vtb">ВТБ</SelectItem>
-                        <SelectItem value="gazprombank">Газпромбанк</SelectItem>
-                        <SelectItem value="alfabank">Альфа-Банк</SelectItem>
-                        <SelectItem value="tinkoff">Тинькофф</SelectItem>
-                        <SelectItem value="raiffeisen">Райффайзенбанк</SelectItem>
-                        <SelectItem value="other">Другой банк</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-4 pt-6">
-                  <div className="flex items-start space-x-2">
-                    <Checkbox 
-                      id="terms"
-                      checked={formData.agreedToTerms}
-                      onCheckedChange={(checked) => updateFormData('agreedToTerms', !!checked)}
-                    />
-                    <Label htmlFor="terms" className="text-sm leading-relaxed">
-                      Я согласен с <a href="#" className="text-micro-blue underline">условиями займа</a> и 
-                      <a href="#" className="text-micro-blue underline ml-1">публичной офертой</a>
-                    </Label>
-                  </div>
-                  
-                  <div className="flex items-start space-x-2">
-                    <Checkbox 
-                      id="data"
-                      checked={formData.agreedToDataProcessing}
-                      onCheckedChange={(checked) => updateFormData('agreedToDataProcessing', !!checked)}
-                    />
-                    <Label htmlFor="data" className="text-sm leading-relaxed">
-                      Я согласен на <a href="#" className="text-micro-blue underline">обработку персональных данных</a>
-                    </Label>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="h-20 sm:hidden" />
-            <div className="fixed bottom-0 left-0 right-0 z-40 flex gap-3 border-t bg-white p-3 sm:static sm:z-auto sm:justify-between sm:border-t sm:bg-transparent sm:p-0 sm:pt-8">
-              <Button
-                variant="outline"
-                onClick={prevStep}
-                disabled={step === 1}
-                className="h-12 sm:h-10 flex items-center sm:flex-none px-4"
-              >
-                <Icon name="ArrowLeft" size={20} className="sm:mr-2" />
-                <span className="hidden sm:inline">Назад</span>
-              </Button>
-
-              {step < 4 ? (
-                <Button
-                  onClick={nextStep}
-                  disabled={!isStepValid()}
-                  className="h-12 sm:h-10 flex-1 sm:flex-none bg-micro-blue hover:bg-[#5A3DCC] text-white flex items-center justify-center text-base sm:text-sm"
-                >
-                  Далее
-                  <Icon name="ArrowRight" size={20} className="ml-2" />
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleSubmit}
-                  disabled={!isStepValid()}
-                  className="h-12 sm:h-10 flex-1 sm:flex-none bg-micro-green hover:bg-red-700 text-white flex items-center justify-center text-base sm:text-sm"
-                >
-                  Отправить заявку
-                  <Icon name="Send" size={20} className="ml-2" />
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        <p className="mt-3 text-center text-xs text-gray-600">Нажимая «{step < 4 ? 'Продолжить' : 'Отправить заявку'}», я даю согласие на обработку моих персональных данных</p>
+        <div className="mt-4 flex items-center justify-center gap-6 text-sm font-bold text-gray-500">
+          <span className="italic text-emerald-700">МИР</span>
+          <span className="flex"><span className="h-6 w-6 rounded-full bg-red-500" /><span className="-ml-2.5 h-6 w-6 rounded-full bg-amber-400 opacity-90" /></span>
+          <span className="text-lg font-extrabold italic text-blue-800">VISA</span>
+        </div>
+      </main>
     </div>
   );
 };
