@@ -241,8 +241,17 @@ def handler(event: dict, context) -> dict:
         key = f"documents/{cid}/{kind}-{secrets.token_hex(8)}.jpg"
         s3_client().put_object(Bucket='files', Key=key, Body=data, ContentType='image/jpeg')
         cur.execute(f"DELETE FROM {SCHEMA}.client_documents WHERE client_id = {cid} AND kind = {esc(kind)}")
+        cur.execute(f"UPDATE {SCHEMA}.clients SET docs_verified = FALSE WHERE id = {cid}")
         cur.execute(f"INSERT INTO {SCHEMA}.client_documents (client_id, kind, url) VALUES ({cid}, {esc(kind)}, {esc(cdn_url(key))})")
         return resp(200, {'success': True, 'url': cdn_url(key)})
+
+    if action == 'confirm_data':
+        answer = body.get('answer')
+        comment = str(body.get('comment', '')).strip()
+        if answer not in ('confirmed', 'wrong'):
+            return resp(400, {'error': 'Неверный ответ'})
+        cur.execute(f"UPDATE {SCHEMA}.applications SET data_confirm = {esc(answer)}, data_confirm_comment = {esc(comment)} WHERE client_id = {cid} AND data_confirm = 'requested'")
+        return resp(200, {'success': True})
 
     if action == 'read_notifications':
         cur.execute(f"UPDATE {SCHEMA}.notifications SET is_read = TRUE WHERE client_id = {cid}")
@@ -253,7 +262,7 @@ def handler(event: dict, context) -> dict:
         days = int(body.get('loanDays') or 0)
         if not (1000 <= amount <= 50000 and 1 <= days <= 30):
             return resp(400, {'error': 'Сумма от 1 000 до 50 000 ₽, срок от 1 до 30 дней'})
-        cur.execute(f"SELECT COUNT(*) FROM {SCHEMA}.applications WHERE client_id = {cid} AND status IN ('new', 'in_work')")
+        cur.execute(f"SELECT COUNT(*) FROM {SCHEMA}.applications WHERE client_id = {cid} AND status IN ('new', 'in_work', 'need_docs')")
         if cur.fetchone()[0]:
             return resp(400, {'error': 'У вас уже есть заявка на рассмотрении'})
         cur.execute(f"SELECT COUNT(*) FROM {SCHEMA}.loans WHERE client_id = {cid} AND status IN ('awaiting_sign', 'signed', 'active', 'overdue')")
@@ -277,8 +286,10 @@ def handler(event: dict, context) -> dict:
     apps = [{'id': f'APP-{r[0]:03d}', 'amount': r[1], 'date': str(r[2])[:10], 'status': r[3], 'statusText': r[4]} for r in cur.fetchall()]
     cur.execute(f"SELECT id, loan_id, kind, amount, note, created_at FROM {SCHEMA}.payments WHERE client_id = {cid} ORDER BY id DESC LIMIT 50")
     payments = [{'id': r[0], 'loan': f'LOAN-{r[1]:03d}', 'kind': r[2], 'amount': r[3], 'note': r[4], 'date': str(r[5])[:16]} for r in cur.fetchall()]
-    cur.execute(f"SELECT kind, url FROM {SCHEMA}.client_documents WHERE client_id = {cid}")
-    docs = {r[0]: r[1] for r in cur.fetchall()}
+    cur.execute(f"SELECT kind, url, status, reject_reason FROM {SCHEMA}.client_documents WHERE client_id = {cid}")
+    docs = {r[0]: {'url': r[1], 'status': r[2], 'reason': r[3]} for r in cur.fetchall()}
+    cur.execute(f"SELECT COUNT(*) FROM {SCHEMA}.applications WHERE client_id = {cid} AND data_confirm = 'requested'")
+    confirm_requested = cur.fetchone()[0] > 0
     cur.execute(f"SELECT id, text, is_read, created_at FROM {SCHEMA}.notifications WHERE client_id = {cid} ORDER BY id DESC LIMIT 30")
     notes = [{'id': r[0], 'text': re.sub(r'\s*\[LOAN-[^\]]*\]$', '', r[1]), 'isRead': r[2], 'date': str(r[3])[:16]} for r in cur.fetchall()]
-    return resp(200, {'profile': profile(cur, cid), 'loans': loans, 'applications': apps, 'payments': payments, 'documents': docs, 'notifications': notes})
+    return resp(200, {'profile': profile(cur, cid), 'loans': loans, 'applications': apps, 'payments': payments, 'documents': docs, 'notifications': notes, 'confirmRequested': confirm_requested})

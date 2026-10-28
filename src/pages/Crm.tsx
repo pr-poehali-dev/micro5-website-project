@@ -11,6 +11,7 @@ const KEY = 'crm_token';
 const STATUSES: Record<string, { label: string; cls: string }> = {
   new: { label: 'Новая', cls: 'bg-micro-blue text-white' },
   in_work: { label: 'В работе', cls: 'bg-amber-500 text-white' },
+  need_docs: { label: 'Нужны данные', cls: 'bg-violet-600 text-white' },
   approved: { label: 'Одобрена', cls: 'bg-emerald-600 text-white' },
   rejected: { label: 'Отклонена', cls: 'bg-micro-green text-white' },
 };
@@ -31,6 +32,32 @@ const call = async (body: Record<string, unknown>, query = '') => {
   if (!res.ok) throw Object.assign(new Error(data.error || 'Ошибка'), { status: res.status });
   return data;
 };
+
+const CALL_RESULTS: Record<string, string> = {
+  reached: 'Дозвонились',
+  no_answer: 'Не ответил',
+  wrong_number: 'Неверный номер',
+  callback: 'Просил перезвонить',
+};
+
+const DOC_STATUS: Record<string, { label: string; cls: string }> = {
+  pending: { label: 'Ждёт проверки', cls: 'bg-amber-500 text-white' },
+  approved: { label: 'Принято', cls: 'bg-emerald-600 text-white' },
+  rejected: { label: 'Отклонено', cls: 'bg-micro-green text-white' },
+};
+
+const CONFIRM: Record<string, { label: string; cls: string }> = {
+  requested: { label: 'Ждём ответ клиента', cls: 'bg-amber-500 text-white' },
+  confirmed: { label: 'Клиент подтвердил данные', cls: 'bg-emerald-600 text-white' },
+  wrong: { label: 'Клиент указал ошибку', cls: 'bg-micro-green text-white' },
+};
+
+const Flag = ({ ok, icon, text }: { ok: boolean; icon: string; text: string }) => (
+  <span className={`inline-flex items-center gap-1 text-xs font-medium rounded-md px-2 py-1 ${ok ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+    <Icon name={icon} size={12} fallback="Circle" />
+    {text}
+  </span>
+);
 
 const StatusBadge = ({ status }: { status: string }) => (
   <Badge className={STATUSES[status]?.cls || 'bg-slate-500 text-white'}>{STATUSES[status]?.label || status}</Badge>
@@ -90,6 +117,7 @@ const Details = ({ id, onClose, onChanged }: { id: number; onClose: () => void; 
   const [d, setD] = useState<any>(null);
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
+  const [photo, setPhoto] = useState('');
 
   const load = useCallback(() => call({}, `?action=get&id=${id}`).then(setD), [id]);
   useEffect(() => { load(); }, [load]);
@@ -109,6 +137,16 @@ const Details = ({ id, onClose, onChanged }: { id: number; onClose: () => void; 
   const reject = () => {
     const reason = prompt('Причина отказа (необязательно)') ;
     if (reason !== null) act('reject', { reason });
+  };
+
+  const rejectDoc = (kind: string) => {
+    const reason = prompt('Почему фото не подходит? Клиент увидит причину');
+    if (reason !== null) act('doc_review', { kind, decision: 'rejected', reason });
+  };
+
+  const needInfo = () => {
+    const reason = prompt('Что нужно уточнить у клиента?');
+    if (reason !== null) act('need_docs', { reason });
   };
 
   const addNote = async () => {
@@ -157,21 +195,82 @@ const Details = ({ id, onClose, onChanged }: { id: number; onClose: () => void; 
               <Row label="Выдано займов" value={`${d.loansCount} на ${Number(d.loansSum).toLocaleString()} ₽`} />
             </CardContent></Card>
 
+            <Card className="bg-white"><CardContent className="p-4 sm:p-6 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="font-semibold text-micro-dark">Проверка телефона</h3>
+                <Badge className={d.phoneVerified ? 'bg-emerald-600 text-white' : 'bg-slate-500 text-white'}>
+                  {d.phoneVerified ? 'Номер подтверждён' : 'Не подтверждён'}
+                </Badge>
+              </div>
+              <a href={`tel:+7${d.phone}`} className="flex items-center justify-center gap-2 h-12 rounded-md bg-micro-blue hover:bg-blue-800 text-white font-semibold">
+                <Icon name="Phone" size={18} />
+                Позвонить +7{d.phone}
+              </a>
+              <div className="grid grid-cols-2 gap-2">
+                {Object.entries(CALL_RESULTS).map(([k, label]) => (
+                  <Button key={k} variant="outline" disabled={busy} onClick={() => act('log_call', { result: k })} className="h-11 text-sm">{label}</Button>
+                ))}
+              </div>
+              <Button variant="ghost" disabled={busy} onClick={() => act('phone_verify', { value: !d.phoneVerified })} className="w-full h-10 text-micro-blue">
+                {d.phoneVerified ? 'Снять отметку «номер подтверждён»' : 'Отметить номер подтверждённым'}
+              </Button>
+              {d.calls.length > 0 && (
+                <div className="space-y-1 pt-1">
+                  {d.calls.map((c: any) => (
+                    <div key={c.id} className="flex justify-between text-sm rounded-md bg-micro-gray px-3 py-2">
+                      <span>{CALL_RESULTS[c.result] || c.result}</span>
+                      <span className="text-gray-500">{c.createdAt}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent></Card>
+
+            <Card className="bg-white"><CardContent className="p-4 sm:p-6 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="font-semibold text-micro-dark">Подтверждение данных клиентом</h3>
+                {CONFIRM[d.dataConfirm] && <Badge className={CONFIRM[d.dataConfirm].cls}>{CONFIRM[d.dataConfirm].label}</Badge>}
+              </div>
+              <p className="text-sm text-gray-600">Клиент увидит просьбу в личном кабинете и ответит «данные верны» или «есть ошибка».</p>
+              {d.dataConfirmComment && <p className="text-sm rounded-md bg-micro-gray p-3">{d.dataConfirmComment}</p>}
+              <Button variant="outline" disabled={busy || d.dataConfirm === 'requested'} onClick={() => act('request_confirm')} className="w-full h-11">
+                <Icon name="ShieldCheck" size={16} className="mr-2" />
+                {d.dataConfirm === 'none' ? 'Попросить подтвердить данные' : 'Запросить подтверждение ещё раз'}
+              </Button>
+            </CardContent></Card>
+
             <Card className="bg-white"><CardContent className="p-4 sm:p-6">
               <h3 className="font-semibold text-micro-dark mb-3">Документы клиента</h3>
-              <div className="grid grid-cols-2 gap-3">
-                {[['passport', 'Паспорт'], ['selfie', 'Селфи с паспортом']].map(([k, label]) => (
-                  <div key={k}>
-                    <p className="text-sm text-gray-600 mb-1">{label}</p>
-                    {d.documents?.[k] ? (
-                      <a href={d.documents[k]} target="_blank" rel="noreferrer">
-                        <img src={d.documents[k]} alt={label} className="w-full h-36 object-cover rounded-md border border-slate-200" />
-                      </a>
-                    ) : (
-                      <div className="h-36 rounded-md border border-dashed border-slate-300 flex items-center justify-center text-sm text-gray-500">Не загружено</div>
-                    )}
-                  </div>
-                ))}
+              <div className="grid sm:grid-cols-2 gap-4">
+                {[['passport', 'Паспорт'], ['selfie', 'Селфи с паспортом']].map(([k, label]) => {
+                  const doc = d.documents?.[k];
+                  return (
+                    <div key={k} className="space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-medium text-micro-dark">{label}</p>
+                        {doc && <Badge className={DOC_STATUS[doc.status]?.cls}>{DOC_STATUS[doc.status]?.label}</Badge>}
+                      </div>
+                      {doc ? (
+                        <>
+                          <button onClick={() => setPhoto(doc.url)} className="block w-full">
+                            <img src={doc.url} alt={label} className="w-full h-48 object-cover rounded-md border border-slate-200" />
+                          </button>
+                          {doc.reason && <p className="text-xs text-gray-600">Причина: {doc.reason}</p>}
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button disabled={busy || doc.status === 'approved'} onClick={() => act('doc_review', { kind: k, decision: 'approved' })} className="h-11 bg-emerald-600 hover:bg-emerald-700 text-white">
+                              <Icon name="Check" size={16} className="mr-1" />Принять
+                            </Button>
+                            <Button disabled={busy || doc.status === 'rejected'} onClick={() => rejectDoc(k)} className="h-11 bg-micro-green hover:bg-red-700 text-white">
+                              <Icon name="X" size={16} className="mr-1" />Отклонить
+                            </Button>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="h-48 rounded-md border border-dashed border-slate-300 flex items-center justify-center text-sm text-gray-500">Клиент не загрузил</div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </CardContent></Card>
 
@@ -193,14 +292,26 @@ const Details = ({ id, onClose, onChanged }: { id: number; onClose: () => void; 
         )}
       </div>
 
+      {photo && (
+        <div className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-3" onClick={() => setPhoto('')}>
+          <img src={photo} alt="Документ" className="max-w-full max-h-full object-contain" />
+          <button className="absolute top-3 right-3 w-11 h-11 rounded-full bg-white text-micro-dark flex items-center justify-center" aria-label="Закрыть">
+            <Icon name="X" size={22} />
+          </button>
+        </div>
+      )}
+
       {d && !closed && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-3">
-          <div className="max-w-3xl mx-auto flex gap-2">
-            {d.status === 'new' && (
-              <Button variant="outline" disabled={busy} onClick={() => act('in_work')} className="h-12 flex-1">Взять в работу</Button>
+          <div className="max-w-3xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {d.status !== 'in_work' && (
+              <Button variant="outline" disabled={busy} onClick={() => act('in_work')} className="h-12">Взять в работу</Button>
             )}
-            <Button disabled={busy} onClick={reject} className="h-12 flex-1 bg-micro-green hover:bg-red-700 text-white">Отклонить</Button>
-            <Button disabled={busy} onClick={() => act('approve')} className="h-12 flex-1 bg-emerald-600 hover:bg-emerald-700 text-white">Одобрить</Button>
+            {d.status !== 'need_docs' && (
+              <Button variant="outline" disabled={busy} onClick={needInfo} className="h-12">Запросить данные</Button>
+            )}
+            <Button disabled={busy} onClick={reject} className="h-12 bg-micro-green hover:bg-red-700 text-white">Отклонить</Button>
+            <Button disabled={busy} onClick={() => act('approve')} className="h-12 bg-emerald-600 hover:bg-emerald-700 text-white">Одобрить</Button>
           </div>
         </div>
       )}
@@ -250,7 +361,7 @@ const Crm = () => {
   if (!authed) return <Login onDone={() => setAuthed(true)} />;
 
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
-  const tabs = [['', 'Все', total], ['new', 'Новые', counts.new || 0], ['in_work', 'В работе', counts.in_work || 0], ['approved', 'Одобрены', counts.approved || 0], ['rejected', 'Отклонены', counts.rejected || 0]] as const;
+  const tabs = [['', 'Все', total], ['new', 'Новые', counts.new || 0], ['in_work', 'В работе', counts.in_work || 0], ['need_docs', 'Нужны данные', counts.need_docs || 0], ['approved', 'Одобрены', counts.approved || 0], ['rejected', 'Отклонены', counts.rejected || 0]] as const;
   const q = search.trim().toLowerCase();
   const shown = items.filter((i) => !q || i.fullName.toLowerCase().includes(q) || i.phone.includes(q.replace(/\D/g, '') || '@@') || String(i.id) === q);
 
@@ -290,9 +401,14 @@ const Crm = () => {
           <div className="space-y-2">
             {shown.map((i) => (
               <button key={i.id} onClick={() => setOpenId(i.id)} className="w-full text-left bg-white border border-slate-200 hover:border-micro-blue rounded-lg p-4 flex items-center justify-between gap-3">
-                <div className="min-w-0">
+                <div className="min-w-0 space-y-1.5">
                   <p className="font-semibold text-micro-dark truncate">№{i.id} · {i.fullName || 'Без имени'}</p>
                   <p className="text-sm text-gray-600">+7{i.phone} · {i.createdAt}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    <Flag ok={i.phoneVerified} icon="Phone" text={i.phoneVerified ? 'Номер подтверждён' : 'Номер не проверен'} />
+                    <Flag ok={i.docsApproved >= 2} icon="FileCheck" text={`Документы ${i.docsApproved}/2`} />
+                    {i.dataConfirm !== 'none' && <Flag ok={i.dataConfirm === 'confirmed'} icon="ShieldCheck" text={i.dataConfirm === 'confirmed' ? 'Данные подтверждены' : i.dataConfirm === 'wrong' ? 'Клиент нашёл ошибку' : 'Ждём ответ'} />}
+                  </div>
                 </div>
                 <div className="text-right shrink-0 space-y-1">
                   <p className="font-semibold text-micro-blue">{i.amount.toLocaleString()} ₽ / {i.days} дн.</p>

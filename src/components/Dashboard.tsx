@@ -9,6 +9,7 @@ import LoanSteps from '@/components/LoanSteps';
 import ActiveLoanCard from '@/components/ActiveLoanCard';
 import DocumentsUpload from '@/components/DocumentsUpload';
 import NewApplicationCard from '@/components/NewApplicationCard';
+import ConfirmDataCard from '@/components/ConfirmDataCard';
 import NotificationsBell, { NotificationItem } from '@/components/NotificationsBell';
 
 interface LoanData {
@@ -29,7 +30,7 @@ interface ApplicationData {
   id: string;
   amount: number;
   date: string;
-  status: 'new' | 'in_work' | 'approved' | 'rejected';
+  status: 'new' | 'in_work' | 'need_docs' | 'approved' | 'rejected';
   statusText: string;
 }
 
@@ -58,6 +59,7 @@ const LOAN_STATUS: Record<string, { label: string; cls: string }> = {
 const APP_STATUS: Record<string, { label: string; cls: string }> = {
   new: { label: 'На рассмотрении', cls: 'bg-micro-blue text-white' },
   in_work: { label: 'В работе', cls: 'bg-amber-500 text-white' },
+  need_docs: { label: 'Нужны данные', cls: 'bg-violet-600 text-white' },
   approved: { label: 'Одобрена', cls: 'bg-emerald-600 text-white' },
   rejected: { label: 'Отклонена', cls: 'bg-micro-green text-white' },
 };
@@ -77,7 +79,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
   const [loans, setLoans] = useState<LoanData[]>([]);
   const [applications, setApplications] = useState<ApplicationData[]>([]);
   const [payments, setPayments] = useState<PaymentData[]>([]);
-  const [documents, setDocuments] = useState<Record<string, string>>({});
+  const [documents, setDocuments] = useState<Record<string, any>>({});
+  const [confirmRequested, setConfirmRequested] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [profile, setProfile] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
@@ -93,6 +96,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
     setDocuments(d.documents);
     setNotifications(d.notifications);
     setProfile(d.profile);
+    setConfirmRequested(d.confirmRequested);
   };
 
   const reload = () => callCabinet({ action: 'me' }).then(apply);
@@ -139,11 +143,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
 
   const activeLoan = loans.find((l) => l.status === 'active' || l.status === 'overdue');
   const pendingLoans = loans.filter((l) => l.status === 'awaiting_sign' || l.status === 'signed');
-  const openApplication = applications.find((a) => a.status === 'new' || a.status === 'in_work');
+  const openApplication = applications.find((a) => a.status === 'new' || a.status === 'in_work' || a.status === 'need_docs');
   const canReapply = !activeLoan && pendingLoans.length === 0 && !openApplication;
   const totalBorrowed = loans.filter((l) => l.status !== 'awaiting_sign' && l.status !== 'signed').reduce((s, l) => s + l.amount, 0);
   const totalPaid = payments.reduce((s, p) => s + p.amount, 0);
-  const docsDone = !!documents.passport && !!documents.selfie;
+  const docsDone = documents.passport?.status === 'approved' && documents.selfie?.status === 'approved';
   const phoneText = profile.phone ? '+7' + profile.phone : userPhone;
 
   return (
@@ -182,6 +186,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
+            {confirmRequested && <ConfirmDataCard profile={profile} phone={phoneText} onDone={reload} />}
+
             {pendingLoans.map((loan) => (
               <LoanSteps key={loan.id} loan={loan} fullName={profile.fullName || ''} onChanged={reload} />
             ))}

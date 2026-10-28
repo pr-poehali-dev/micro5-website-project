@@ -5,7 +5,7 @@ import Icon from '@/components/ui/icon';
 import { callCabinet } from '@/lib/cabinetApi';
 
 interface Props {
-  documents: Record<string, string>;
+  documents: Record<string, { url: string; status: string; reason: string }>;
   onChanged: () => void;
 }
 
@@ -51,7 +51,7 @@ const DocumentsUpload: React.FC<Props> = ({ documents, onChanged }) => {
     setBusy('');
   };
 
-  const complete = KINDS.every((k) => documents[k.key]);
+  const complete = KINDS.every((k) => documents[k.key]?.status === 'approved');
 
   return (
     <Card className="rounded-lg border border-slate-200 bg-white">
@@ -62,7 +62,7 @@ const DocumentsUpload: React.FC<Props> = ({ documents, onChanged }) => {
             <p className="text-sm text-gray-600">Нужны для проверки заявки сотрудником</p>
           </div>
           <span className={`text-xs font-semibold px-2 py-1 rounded-md text-white ${complete ? 'bg-emerald-600' : 'bg-amber-500'}`}>
-            {complete ? 'Загружены' : 'Не хватает'}
+            {complete ? 'Приняты' : 'Нужны документы'}
           </span>
         </div>
 
@@ -71,12 +71,17 @@ const DocumentsUpload: React.FC<Props> = ({ documents, onChanged }) => {
             <div key={k.key} className="space-y-2">
               <p className="text-sm font-medium text-micro-dark">{k.title}</p>
               {documents[k.key] ? (
-                <img src={documents[k.key]} alt={k.title} className="w-full h-32 object-cover rounded-md border border-slate-200" />
+                <img src={documents[k.key].url} alt={k.title} className="w-full h-32 object-cover rounded-md border border-slate-200" />
               ) : (
                 <div className="h-32 rounded-md border border-dashed border-slate-300 flex flex-col items-center justify-center text-center px-2">
                   <Icon name="ImagePlus" size={24} className="text-gray-400 mb-1" />
                   <span className="text-xs text-gray-500">{k.hint}</span>
                 </div>
+              )}
+              {documents[k.key] && (
+                <p className={`text-xs font-medium ${documents[k.key].status === 'approved' ? 'text-emerald-700' : documents[k.key].status === 'rejected' ? 'text-micro-green' : 'text-amber-600'}`}>
+                  {documents[k.key].status === 'approved' ? 'Принято' : documents[k.key].status === 'rejected' ? `Отклонено${documents[k.key].reason ? ': ' + documents[k.key].reason : ''}` : 'На проверке'}
+                </p>
               )}
               <input
                 ref={(el) => { refs.current[k.key] = el; }}
@@ -93,7 +98,7 @@ const DocumentsUpload: React.FC<Props> = ({ documents, onChanged }) => {
                 className="w-full h-11"
               >
                 <Icon name="Upload" size={16} className="mr-2" />
-                {busy === k.key ? 'Загружаем...' : documents[k.key] ? 'Заменить' : 'Загрузить'}
+                {busy === k.key ? 'Загружаем...' : documents[k.key] ? 'Заменить фото' : 'Загрузить'}
               </Button>
             </div>
           ))}
