@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { callCabinet, clearToken } from '@/lib/cabinetApi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
@@ -32,50 +32,50 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Моковые данные займов
-  const loans: LoanData[] = [
-    {
-      id: 'LOAN-001',
-      amount: 25000,
-      returnAmount: 26200,
-      dueDate: '2024-08-15',
-      status: 'active',
-      daysLeft: 12
-    },
-    {
-      id: 'LOAN-002',
-      amount: 15000,
-      returnAmount: 15600,
-      dueDate: '2024-07-25',
-      status: 'paid',
-      daysLeft: 0
-    }
-  ];
+  const [loans, setLoans] = useState<LoanData[]>([]);
+  const [applications, setApplications] = useState<ApplicationData[]>([]);
+  const [profile, setProfile] = useState<Record<string, any>>({});
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
 
-  // Моковые данные заявок
-  const applications: ApplicationData[] = [
-    {
-      id: 'APP-003',
-      amount: 35000,
-      date: '2024-07-20',
-      status: 'processing',
-      statusText: 'Проходит проверку'
-    },
-    {
-      id: 'APP-002',
-      amount: 25000,
-      date: '2024-07-15',
-      status: 'approved',
-      statusText: 'Одобрена, займ активен'
-    },
-    {
-      id: 'APP-001',
-      amount: 45000,
-      date: '2024-07-10',
-      status: 'rejected',
-      statusText: 'Отклонена'
+  useEffect(() => {
+    callCabinet({ action: 'me' })
+      .then((d) => {
+        setLoans(d.loans);
+        setApplications(d.applications);
+        setProfile(d.profile);
+      })
+      .catch(() => {
+        clearToken();
+        onLogout();
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const startEdit = () => {
+    setForm({
+      fullName: profile.fullName || '',
+      email: profile.email || '',
+      birthDate: profile.birthDate || '',
+      address: profile.address || '',
+      income: profile.income || '',
+      employment: profile.employment || '',
+    });
+    setEditing(true);
+  };
+
+  const saveProfile = async () => {
+    setSaving(true);
+    try {
+      const d = await callCabinet({ action: 'update_profile', ...form });
+      setProfile(d.profile);
+      setEditing(false);
+    } finally {
+      setSaving(false);
     }
-  ];
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -107,6 +107,10 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
   const totalBorrowed = loans.reduce((sum, loan) => sum + loan.amount, 0);
   const totalPaid = loans.filter(loan => loan.status === 'paid').reduce((sum, loan) => sum + loan.returnAmount, 0);
 
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center text-gray-600">Загружаем данные...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-micro-gray via-white to-micro-light">
       {/* Header */}
@@ -119,7 +123,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
               </div>
               <div>
                 <span className="text-lg sm:text-2xl font-bold text-micro-dark">Личный кабинет</span>
-                <p className="text-sm text-gray-600">{userPhone}</p>
+                <p className="text-sm text-gray-600">{profile.phone ? '+7' + profile.phone : userPhone}</p>
               </div>
             </div>
             
@@ -289,6 +293,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
           {/* Займы */}
           <TabsContent value="loans" className="space-y-6">
             <div className="space-y-4">
+              {loans.length === 0 && <p className="text-center text-gray-600 py-8">Займов пока нет</p>}
               {loans.map((loan) => (
                 <Card key={loan.id} className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-shadow">
                   <CardContent className="p-4 sm:p-6">
@@ -343,6 +348,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
           {/* Заявки */}
           <TabsContent value="applications" className="space-y-6">
             <div className="space-y-4">
+              {applications.length === 0 && <p className="text-center text-gray-600 py-8">Заявок пока нет</p>}
               {applications.map((app) => (
                 <Card key={app.id} className="rounded-3xl border-0 shadow-lg hover:shadow-xl transition-shadow">
                   <CardContent className="p-4 sm:p-6">
@@ -388,6 +394,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
           </TabsContent>
 
           <TabsContent value="contracts" className="space-y-4">
+            {loans.length === 0 && <p className="text-center text-gray-600 py-8">Договоров пока нет</p>}
             {loans.map((loan) => (
               <Card key={loan.id} className="rounded-3xl border-0 shadow-lg">
                 <CardContent className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -418,22 +425,47 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex justify-between gap-4">
-                  <span className="text-gray-600">Телефон</span>
-                  <span className="font-semibold">{userPhone}</span>
-                </div>
-                <div className="flex justify-between gap-4">
-                  <span className="text-gray-600">Статус анкеты</span>
-                  <Badge className="bg-micro-blue text-white">Заполнена</Badge>
-                </div>
-                <div className="flex justify-between gap-4">
-                  <span className="text-gray-600">Документы</span>
-                  <Badge className="bg-micro-blue text-white">Проверены</Badge>
-                </div>
-                <Button className="w-full bg-micro-blue hover:bg-blue-800 rounded-xl">
-                  <Icon name="Pencil" size={16} className="mr-2" />
-                  Обновить анкету
-                </Button>
+                {editing ? (
+                  <>
+                    {[['fullName', 'ФИО'], ['email', 'Email'], ['birthDate', 'Дата рождения'], ['address', 'Адрес'], ['income', 'Доход'], ['employment', 'Занятость']].map(([key, label]) => (
+                      <div key={key} className="space-y-1">
+                        <label className="text-sm text-gray-600">{label}</label>
+                        <input
+                          className="w-full rounded-xl border border-input px-3 py-2 text-base"
+                          value={form[key] || ''}
+                          onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                        />
+                      </div>
+                    ))}
+                    <div className="flex gap-3">
+                      <Button onClick={saveProfile} disabled={saving} className="flex-1 bg-micro-blue hover:bg-blue-800 rounded-xl">
+                        Сохранить
+                      </Button>
+                      <Button variant="outline" onClick={() => setEditing(false)} className="flex-1 rounded-xl">
+                        Отмена
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {[['Телефон', profile.phone ? '+7' + profile.phone : userPhone], ['ФИО', profile.fullName], ['Email', profile.email], ['Дата рождения', profile.birthDate], ['Паспорт', profile.passportSeries ? `${profile.passportSeries} ${profile.passportNumber}` : ''], ['Адрес', profile.address], ['Доход', profile.income], ['Занятость', profile.employment], ['Карта', profile.cardLast4 ? `•••• ${profile.cardLast4}` : '']].map(([label, value]) => (
+                      <div key={label} className="flex justify-between gap-4">
+                        <span className="text-gray-600">{label}</span>
+                        <span className="font-semibold text-right break-words">{value || '—'}</span>
+                      </div>
+                    ))}
+                    <div className="flex justify-between gap-4">
+                      <span className="text-gray-600">Документы</span>
+                      <Badge className={profile.docsVerified ? 'bg-micro-blue text-white' : 'bg-slate-500 text-white'}>
+                        {profile.docsVerified ? 'Проверены' : 'На проверке'}
+                      </Badge>
+                    </div>
+                    <Button onClick={startEdit} className="w-full bg-micro-blue hover:bg-blue-800 rounded-xl">
+                      <Icon name="Pencil" size={16} className="mr-2" />
+                      Обновить анкету
+                    </Button>
+                  </>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

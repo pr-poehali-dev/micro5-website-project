@@ -16,12 +16,13 @@ import ApplicationProcessing from '@/components/ApplicationProcessing';
 import ApplicationReview from '@/components/ApplicationReview';
 import ApplicationRejected from '@/components/ApplicationRejected';
 import { submitLoanApplication } from '@/utils/amoCrmIntegration';
+import { callCabinet, clearToken, getToken } from '@/lib/cabinetApi';
 
 const Index = () => {
   const [loanAmount, setLoanAmount] = useState([25000]);
   const [loanDays, setLoanDays] = useState([15]);
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!getToken());
   const [userPhone, setUserPhone] = useState('');
   const [currentView, setCurrentView] = useState<'main' | 'form' | 'submitted' | 'processing' | 'review' | 'rejected'>('main');
   const [applicationId] = useState(`ML${Date.now().toString().slice(-6)}`);
@@ -40,6 +41,8 @@ const Index = () => {
   };
 
   const handleLogout = () => {
+    callCabinet({ action: 'logout' }).catch(() => undefined);
+    clearToken();
     setIsLoggedIn(false);
     setUserPhone('');
   };
@@ -50,6 +53,7 @@ const Index = () => {
 
   const handleFormSubmit = (data: any) => {
     setFormData(data);
+    callCabinet({ action: 'apply', ...data, loanAmount: loanAmount[0], loanDays: loanDays[0] }).catch(() => undefined);
     setCurrentView('submitted');
   };
 

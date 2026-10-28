@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
+import { callCabinet, setToken } from '@/lib/cabinetApi';
 
 interface LoginModalProps {
   children: React.ReactNode;
@@ -18,6 +19,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ children, onLogin }) => {
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [error, setError] = useState('');
 
   const formatPhone = (value: string) => {
     const cleaned = value.replace(/\D/g, '');
@@ -58,15 +60,17 @@ const LoginModal: React.FC<LoginModalProps> = ({ children, onLogin }) => {
 
   const handleVerifyCode = async () => {
     setIsLoading(true);
-    
-    // Имитация проверки кода
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setIsLoading(false);
-    
-    if (onLogin) {
-      onLogin(phone, code);
+    setError('');
+    try {
+      const data = await callCabinet({ action: 'login', phone });
+      setToken(data.token);
+      if (onLogin) {
+        onLogin(phone, code);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Ошибка входа');
     }
+    setIsLoading(false);
   };
 
   const handleResendCode = () => {
@@ -202,6 +206,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ children, onLogin }) => {
                     </div>
                   )}
                   
+                  {error && <p className="text-sm text-red-600 text-center">{error}</p>}
                   <Button 
                     onClick={handleVerifyCode}
                     disabled={code.length !== 4 || isLoading}
