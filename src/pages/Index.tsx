@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
+import ChatWidget from '@/components/ChatWidget';
 import LoginModal from '@/components/LoginModal';
 import Dashboard from '@/components/Dashboard';
 import ExtendedApplicationForm from '@/components/ExtendedApplicationForm';
@@ -352,12 +353,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Чат-бот */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <Button className="w-16 h-16 rounded-full bg-micro-blue hover:bg-blue-800 shadow-sm animate-bounce-soft">
-          <Icon name="MessageCircle" size={24} />
-        </Button>
-      </div>
+      <ChatWidget />
 
       {/* Footer */}
       <footer className="bg-micro-dark text-white py-12 ">
