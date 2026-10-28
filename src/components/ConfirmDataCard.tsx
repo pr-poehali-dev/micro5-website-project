@@ -31,7 +31,7 @@ const ConfirmDataCard: React.FC<Props> = ({ profile, phone, onDone }) => {
   };
 
   return (
-    <Card className="rounded-lg border-2 border-amber-500 bg-white">
+    <Card className="rounded-2xl border-0 bg-white shadow-md ring-2 ring-amber-400">
       <CardContent className="p-4 sm:p-6 space-y-4">
         <div>
           <h3 className="text-lg font-semibold text-micro-dark">Подтвердите ваши данные</h3>
@@ -58,20 +58,20 @@ const ConfirmDataCard: React.FC<Props> = ({ profile, phone, onDone }) => {
         <div className="flex flex-col sm:flex-row gap-3">
           {!wrong ? (
             <>
-              <Button disabled={busy} onClick={() => send('confirmed')} className="flex-1 h-12 bg-emerald-600 hover:bg-emerald-700 text-white text-base">
+              <Button disabled={busy} onClick={() => send('confirmed')} className="flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-base">
                 <Icon name="Check" size={18} className="mr-2" />
                 Всё верно
               </Button>
-              <Button disabled={busy} variant="outline" onClick={() => setWrong(true)} className="flex-1 h-12 text-base">
+              <Button disabled={busy} variant="outline" onClick={() => setWrong(true)} className="flex-1 h-12 rounded-xl text-base">
                 Есть ошибка
               </Button>
             </>
           ) : (
             <>
-              <Button disabled={busy || !comment.trim()} onClick={() => send('wrong')} className="flex-1 h-12 bg-micro-blue hover:bg-blue-800 text-white text-base">
+              <Button disabled={busy || !comment.trim()} onClick={() => send('wrong')} className="flex-1 h-12 rounded-xl bg-micro-blue hover:bg-blue-800 text-white text-base">
                 Отправить
               </Button>
-              <Button disabled={busy} variant="outline" onClick={() => setWrong(false)} className="flex-1 h-12 text-base">
+              <Button disabled={busy} variant="outline" onClick={() => setWrong(false)} className="flex-1 h-12 rounded-xl text-base">
                 Назад
               </Button>
             </>

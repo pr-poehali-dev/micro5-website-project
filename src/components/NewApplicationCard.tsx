@@ -32,7 +32,7 @@ const NewApplicationCard: React.FC<Props> = ({ onCreated }) => {
   };
 
   return (
-    <Card className="rounded-lg border border-slate-200 bg-white">
+    <Card className="rounded-2xl border-0 bg-white shadow-sm ring-1 ring-slate-100">
       <CardContent className="p-4 sm:p-6 space-y-5">
         <div>
           <h3 className="text-lg font-semibold text-micro-dark">Новый займ в один клик</h3>
@@ -61,7 +61,7 @@ const NewApplicationCard: React.FC<Props> = ({ onCreated }) => {
         </div>
 
         {error && <p className="text-sm text-micro-green">{error}</p>}
-        <Button onClick={submit} disabled={busy} className="w-full h-12 bg-micro-blue hover:bg-blue-800 text-white text-base">
+        <Button onClick={submit} disabled={busy} className="w-full h-12 rounded-xl bg-micro-blue hover:bg-blue-800 text-white text-base">
           Подать заявку
           <Icon name="ArrowRight" size={18} className="ml-2" />
         </Button>

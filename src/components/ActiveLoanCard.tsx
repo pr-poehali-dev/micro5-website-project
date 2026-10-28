@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -56,43 +55,38 @@ const ActiveLoanCard: React.FC<Props> = ({ loan, onChanged }) => {
 
   return (
     <>
-      <Card className="rounded-lg border border-slate-200 bg-white">
-        <CardContent className="p-4 sm:p-6 space-y-5">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-sm text-gray-600">Активный займ {loan.id}</p>
-              <p className="text-3xl font-semibold text-micro-dark">{loan.amount.toLocaleString()} ₽</p>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-600">К возврату</p>
-              <p className="text-xl font-semibold text-micro-blue">{loan.returnAmount.toLocaleString()} ₽</p>
-            </div>
+      <div className="rounded-3xl bg-gradient-to-br from-micro-dark via-[#17308a] to-micro-blue text-white p-5 sm:p-7 shadow-lg space-y-6">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-sm text-white/70">Ваш займ {loan.id}</p>
+            <p className="text-4xl font-bold tracking-tight mt-1">{loan.amount.toLocaleString()} ₽</p>
           </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Вернуть до {new Date(loan.dueDate).toLocaleDateString('ru-RU')}</span>
-              <span className={`font-semibold ${loan.daysLeft <= 2 ? 'text-micro-green' : 'text-micro-dark'}`}>
-                {loan.daysLeft === 0 ? 'сегодня' : `осталось ${loan.daysLeft} дн.`}
-              </span>
-            </div>
-            <Progress value={progress} className="h-2" />
+          <div className="rounded-full bg-white/15 px-3 py-1 text-xs font-medium">
+            {loan.daysLeft === 0 ? 'Срок сегодня' : `${loan.daysLeft} дн. до возврата`}
           </div>
+        </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button onClick={() => { setError(''); setMode('repay'); }} className="flex-1 h-12 bg-micro-green hover:bg-red-700 text-white text-base">
-              <Icon name="CreditCard" size={18} className="mr-2" />
-              Погасить займ
+        <div className="space-y-2">
+          <Progress value={progress} className="h-2 bg-white/20" />
+          <div className="flex justify-between text-sm text-white/80">
+            <span>Вернуть до {new Date(loan.dueDate).toLocaleDateString('ru-RU')}</span>
+            <span className="font-semibold text-white">{loan.returnAmount.toLocaleString()} ₽</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button onClick={() => { setError(''); setMode('repay'); }} className="flex-1 h-12 rounded-xl bg-white text-micro-dark hover:bg-slate-100 text-base font-semibold">
+            <Icon name="CreditCard" size={18} className="mr-2" />
+            Погасить займ
+          </Button>
+          {loan.canExtend && (
+            <Button onClick={openExtend} className="flex-1 h-12 rounded-xl bg-white/15 text-white hover:bg-white/25 border border-white/30 text-base">
+              <Icon name="CalendarPlus" size={18} className="mr-2" />
+              Продлить срок
             </Button>
-            {loan.canExtend && (
-              <Button onClick={openExtend} variant="outline" className="flex-1 h-12 text-base">
-                <Icon name="CalendarPlus" size={18} className="mr-2" />
-                Продлить срок
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+          )}
+        </div>
+      </div>
 
       <Dialog open={mode !== null} onOpenChange={(v) => !v && setMode(null)}>
         <DialogContent className="max-w-md">
@@ -113,7 +107,7 @@ const ActiveLoanCard: React.FC<Props> = ({ loan, onChanged }) => {
             </div>
           )}
           {error && <p className="text-sm text-micro-green">{error}</p>}
-          <Button onClick={confirm} disabled={busy} className="w-full h-12 bg-micro-blue hover:bg-blue-800 text-white text-base">
+          <Button onClick={confirm} disabled={busy} className="w-full h-12 rounded-xl bg-micro-blue hover:bg-blue-800 text-white text-base">
             {busy ? 'Обрабатываем...' : 'Подтвердить'}
           </Button>
         </DialogContent>

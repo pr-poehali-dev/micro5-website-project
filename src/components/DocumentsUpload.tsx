@@ -54,7 +54,7 @@ const DocumentsUpload: React.FC<Props> = ({ documents, onChanged }) => {
   const complete = KINDS.every((k) => documents[k.key]?.status === 'approved');
 
   return (
-    <Card className="rounded-lg border border-slate-200 bg-white">
+    <Card className="rounded-2xl border-0 bg-white shadow-sm ring-1 ring-slate-100">
       <CardContent className="p-4 sm:p-6 space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div>

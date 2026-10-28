@@ -51,7 +51,7 @@ const LoanSteps: React.FC<Props> = ({ loan, fullName, onChanged }) => {
 
   return (
     <>
-      <Card className="rounded-lg border-2 border-micro-blue bg-white">
+      <Card className="rounded-2xl border-0 bg-white shadow-md ring-2 ring-micro-blue">
         <CardContent className="p-4 sm:p-6 space-y-5">
           <div>
             <h3 className="text-lg font-semibold text-micro-dark">Ваш займ одобрен</h3>
@@ -79,12 +79,12 @@ const LoanSteps: React.FC<Props> = ({ loan, fullName, onChanged }) => {
           {error && <p className="text-sm text-micro-green">{error}</p>}
 
           {!signed ? (
-            <Button onClick={() => setOpen(true)} className="w-full h-12 bg-micro-blue hover:bg-blue-800 text-white text-base">
+            <Button onClick={() => setOpen(true)} className="w-full h-12 rounded-xl bg-micro-blue hover:bg-blue-800 text-white text-base">
               <Icon name="FileSignature" size={18} className="mr-2" />
               Прочитать и подписать договор
             </Button>
           ) : (
-            <Button onClick={() => run('payout')} disabled={busy} className="w-full h-12 bg-micro-green hover:bg-red-700 text-white text-base">
+            <Button onClick={() => run('payout')} disabled={busy} className="w-full h-12 rounded-xl bg-micro-green hover:bg-red-700 text-white text-base">
               <Icon name="Wallet" size={18} className="mr-2" />
               Получить {loan.amount.toLocaleString()} ₽ на карту
             </Button>
@@ -112,7 +112,7 @@ const LoanSteps: React.FC<Props> = ({ loan, fullName, onChanged }) => {
             </label>
           </div>
           {error && <p className="text-sm text-micro-green">{error}</p>}
-          <Button onClick={() => run('sign')} disabled={!agree || busy} className="w-full h-12 bg-micro-blue hover:bg-blue-800 text-white">
+          <Button onClick={() => run('sign')} disabled={!agree || busy} className="w-full h-12 rounded-xl bg-micro-blue hover:bg-blue-800 text-white">
             Подписать договор
           </Button>
         </DialogContent>
