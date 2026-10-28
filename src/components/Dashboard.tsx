@@ -9,6 +9,7 @@ import LoanSteps from '@/components/LoanSteps';
 import ActiveLoanCard from '@/components/ActiveLoanCard';
 import DocumentsUpload from '@/components/DocumentsUpload';
 import NewApplicationCard from '@/components/NewApplicationCard';
+import ApplicationStatusCard from '@/components/ApplicationStatusCard';
 import ConfirmDataCard from '@/components/ConfirmDataCard';
 import NotificationsBell, { NotificationItem } from '@/components/NotificationsBell';
 
@@ -54,14 +55,6 @@ const LOAN_STATUS: Record<string, { label: string; cls: string }> = {
   paid: { label: 'Погашен', cls: 'bg-slate-500 text-white' },
   awaiting_sign: { label: 'Ждёт подписи', cls: 'bg-amber-500 text-white' },
   signed: { label: 'Ждёт выплаты', cls: 'bg-amber-500 text-white' },
-};
-
-const APP_STATUS: Record<string, { label: string; cls: string }> = {
-  new: { label: 'На рассмотрении', cls: 'bg-micro-blue text-white' },
-  in_work: { label: 'В работе', cls: 'bg-amber-500 text-white' },
-  need_docs: { label: 'Нужны данные', cls: 'bg-violet-600 text-white' },
-  approved: { label: 'Одобрена', cls: 'bg-emerald-600 text-white' },
-  rejected: { label: 'Отклонена', cls: 'bg-micro-green text-white' },
 };
 
 const money = (n: number) => `${n.toLocaleString()} ₽`;
@@ -144,6 +137,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
   const activeLoan = loans.find((l) => l.status === 'active' || l.status === 'overdue');
   const pendingLoans = loans.filter((l) => l.status === 'awaiting_sign' || l.status === 'signed');
   const openApplication = applications.find((a) => a.status === 'new' || a.status === 'in_work' || a.status === 'need_docs');
+  const latestApplication = applications[0];
+  const shownApplication = openApplication || (latestApplication?.status === 'rejected' && !activeLoan && pendingLoans.length === 0 ? latestApplication : undefined);
   const canReapply = !activeLoan && pendingLoans.length === 0 && !openApplication;
   const totalBorrowed = loans.filter((l) => l.status !== 'awaiting_sign' && l.status !== 'signed').reduce((s, l) => s + l.amount, 0);
   const totalPaid = payments.reduce((s, p) => s + p.amount, 0);
@@ -194,16 +189,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
 
             {activeLoan && <ActiveLoanCard loan={activeLoan} onChanged={reload} />}
 
-            {openApplication && (
-              <Card className="rounded-2xl border-0 bg-white shadow-sm ring-1 ring-slate-100">
-                <CardContent className="p-4 sm:p-6 flex items-center justify-between gap-3">
-                  <div>
-                    <p className="font-semibold text-micro-dark">Заявка {openApplication.id} на {money(openApplication.amount)}</p>
-                    <p className="text-sm text-gray-600">{openApplication.statusText}</p>
-                  </div>
-                  <Badge className={APP_STATUS[openApplication.status].cls}>{APP_STATUS[openApplication.status].label}</Badge>
-                </CardContent>
-              </Card>
+            {shownApplication && (
+              <ApplicationStatusCard id={shownApplication.id} amount={shownApplication.amount} status={shownApplication.status} statusText={shownApplication.statusText} />
             )}
 
             {!docsDone && <DocumentsUpload documents={documents} onChanged={reload} />}
@@ -265,16 +252,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
           <TabsContent value="applications" className="space-y-3">
             {applications.length === 0 && <p className="text-center text-gray-600 py-8">Заявок пока нет</p>}
             {applications.map((app) => (
-              <Card key={app.id} className="rounded-2xl border-0 bg-white shadow-sm ring-1 ring-slate-100">
-                <CardContent className="p-4 flex items-center justify-between gap-3">
-                  <div>
-                    <p className="font-semibold text-micro-dark">{app.id} · {money(app.amount)}</p>
-                    <p className="text-sm text-gray-600">{app.statusText}</p>
-                    <p className="text-xs text-gray-500">{dateRu(app.date)}</p>
-                  </div>
-                  <Badge className={APP_STATUS[app.status]?.cls}>{APP_STATUS[app.status]?.label}</Badge>
-                </CardContent>
-              </Card>
+              <ApplicationStatusCard key={app.id} id={app.id} amount={app.amount} status={app.status} statusText={`${app.statusText} · ${dateRu(app.date)}`} compact />
             ))}
           </TabsContent>
 
