@@ -144,6 +144,11 @@ const Details = ({ id, onClose, onChanged }: { id: number; onClose: () => void; 
     if (reason !== null) act('doc_review', { kind, decision: 'rejected', reason });
   };
 
+  const rejectVideo = () => {
+    const reason = prompt('Почему видео не подходит? Клиент увидит причину');
+    if (reason !== null) act('video_review', { decision: 'rejected', reason });
+  };
+
   const needInfo = () => {
     const reason = prompt('Что нужно уточнить у клиента?');
     if (reason !== null) act('need_docs', { reason });
@@ -237,6 +242,33 @@ const Details = ({ id, onClose, onChanged }: { id: number; onClose: () => void; 
                 <Icon name="ShieldCheck" size={16} className="mr-2" />
                 {d.dataConfirm === 'none' ? 'Попросить подтвердить данные' : 'Запросить подтверждение ещё раз'}
               </Button>
+            </CardContent></Card>
+
+            <Card className="bg-white"><CardContent className="p-4 sm:p-6 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="font-semibold text-micro-dark">Видеоидентификация</h3>
+                {d.video && <Badge className={DOC_STATUS[d.video.status]?.cls}>{DOC_STATUS[d.video.status]?.label}</Badge>}
+              </div>
+              {d.video ? (
+                <>
+                  <video src={d.video.url} controls playsInline className="w-full max-h-96 rounded-md bg-black" />
+                  <p className="text-xs text-gray-500">Записано {d.video.createdAt}</p>
+                  <p className={`text-sm rounded-md p-3 ${d.video.autoIssues ? 'bg-amber-50 text-amber-800' : 'bg-emerald-50 text-emerald-700'}`}>
+                    {d.video.autoIssues ? `Автопроверка: ${d.video.autoIssues}` : 'Автопроверка: лицо в кадре видно чётко, одно лицо, по центру'}
+                  </p>
+                  {d.video.reason && <p className="text-xs text-gray-600">Причина отказа: {d.video.reason}</p>}
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button disabled={busy || d.video.status === 'approved'} onClick={() => act('video_review', { decision: 'approved' })} className="h-11 bg-emerald-600 hover:bg-emerald-700 text-white">
+                      <Icon name="Check" size={16} className="mr-1" />Принять
+                    </Button>
+                    <Button disabled={busy || d.video.status === 'rejected'} onClick={rejectVideo} className="h-11 bg-micro-green hover:bg-red-700 text-white">
+                      <Icon name="X" size={16} className="mr-1" />Отклонить
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-gray-500">Клиент ещё не записал видео</p>
+              )}
             </CardContent></Card>
 
             <Card className="bg-white"><CardContent className="p-4 sm:p-6">
@@ -406,6 +438,7 @@ const Crm = () => {
                   <p className="text-sm text-gray-600">+7{i.phone} · {i.createdAt}</p>
                   <div className="flex flex-wrap gap-1.5">
                     <Flag ok={i.phoneVerified} icon="Phone" text={i.phoneVerified ? 'Номер подтверждён' : 'Номер не проверен'} />
+                    <Flag ok={i.videoStatus === 'approved'} icon="Video" text={i.videoStatus === 'approved' ? 'Видео принято' : i.videoStatus === 'pending' ? 'Видео на проверке' : i.videoStatus === 'rejected' ? 'Видео отклонено' : 'Нет видео'} />
                     <Flag ok={i.docsApproved >= 2} icon="FileCheck" text={`Документы ${i.docsApproved}/2`} />
                     {i.dataConfirm !== 'none' && <Flag ok={i.dataConfirm === 'confirmed'} icon="ShieldCheck" text={i.dataConfirm === 'confirmed' ? 'Данные подтверждены' : i.dataConfirm === 'wrong' ? 'Клиент нашёл ошибку' : 'Ждём ответ'} />}
                   </div>

@@ -10,6 +10,7 @@ import ActiveLoanCard from '@/components/ActiveLoanCard';
 import DocumentsUpload from '@/components/DocumentsUpload';
 import NewApplicationCard from '@/components/NewApplicationCard';
 import ApplicationStatusCard from '@/components/ApplicationStatusCard';
+import VideoVerification from '@/components/VideoVerification';
 import PromoBanner from '@/components/PromoBanner';
 import ConfirmDataCard from '@/components/ConfirmDataCard';
 import NotificationsBell, { NotificationItem } from '@/components/NotificationsBell';
@@ -75,6 +76,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
   const [payments, setPayments] = useState<PaymentData[]>([]);
   const [documents, setDocuments] = useState<Record<string, any>>({});
   const [confirmRequested, setConfirmRequested] = useState(false);
+  const [video, setVideo] = useState<{ status: string; reason: string; date: string } | null>(null);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [profile, setProfile] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
@@ -91,6 +93,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
     setNotifications(d.notifications);
     setProfile(d.profile);
     setConfirmRequested(d.confirmRequested);
+    setVideo(d.video);
   };
 
   const reload = () => callCabinet({ action: 'me' }).then(apply);
@@ -195,6 +198,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
             {shownApplication && (
               <ApplicationStatusCard id={shownApplication.id} amount={shownApplication.amount} status={shownApplication.status} statusText={shownApplication.statusText} />
             )}
+
+            <VideoVerification video={video} onChanged={reload} />
 
             {!docsDone && <DocumentsUpload documents={documents} onChanged={reload} />}
 

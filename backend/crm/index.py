@@ -65,11 +65,12 @@ def handler(event: dict, context) -> dict:
         where = f"WHERE a.status = {esc(status)}" if status else ''
         cur.execute(f"""SELECT a.id, a.amount, a.days, a.status, a.status_text, a.created_at, c.full_name, c.phone,
             c.phone_verified, a.data_confirm,
+            (SELECT status FROM {SCHEMA}.video_checks v WHERE v.client_id = c.id ORDER BY v.id DESC LIMIT 1),
             (SELECT COUNT(*) FROM {SCHEMA}.client_documents d WHERE d.client_id = c.id),
             (SELECT COUNT(*) FROM {SCHEMA}.client_documents d WHERE d.client_id = c.id AND d.status = 'approved')
             FROM {SCHEMA}.applications a JOIN {SCHEMA}.clients c ON c.id = a.client_id {where}
             ORDER BY a.id DESC LIMIT 500""")
-        items = [{'id': r[0], 'amount': r[1], 'days': r[2], 'status': r[3], 'statusText': r[4], 'createdAt': str(r[5])[:16], 'fullName': r[6], 'phone': r[7], 'phoneVerified': r[8], 'dataConfirm': r[9], 'docsCount': r[10], 'docsApproved': r[11]} for r in cur.fetchall()]
+        items = [{'id': r[0], 'amount': r[1], 'days': r[2], 'status': r[3], 'statusText': r[4], 'createdAt': str(r[5])[:16], 'fullName': r[6], 'phone': r[7], 'phoneVerified': r[8], 'dataConfirm': r[9], 'videoStatus': r[10], 'docsCount': r[11], 'docsApproved': r[12]} for r in cur.fetchall()]
         cur.execute(f"SELECT status, COUNT(*) FROM {SCHEMA}.applications GROUP BY status")
         counts = {r[0]: r[1] for r in cur.fetchall()}
         return resp(200, {'items': items, 'counts': counts})
@@ -93,6 +94,9 @@ def handler(event: dict, context) -> dict:
         loans = cur.fetchone()
         cur.execute(f"SELECT kind, url, status, reject_reason FROM {SCHEMA}.client_documents WHERE client_id = {data['clientId']}")
         data['documents'] = {d[0]: {'url': d[1], 'status': d[2], 'reason': d[3]} for d in cur.fetchall()}
+        cur.execute(f"SELECT id, url, auto_ok, auto_issues, status, reject_reason, created_at FROM {SCHEMA}.video_checks WHERE client_id = {data['clientId']} ORDER BY id DESC LIMIT 1")
+        v = cur.fetchone()
+        data['video'] = {'id': v[0], 'url': v[1], 'autoOk': v[2], 'autoIssues': v[3], 'status': v[4], 'reason': v[5], 'createdAt': str(v[6])[:16]} if v else None
         cur.execute(f"SELECT id, result, comment, created_at FROM {SCHEMA}.call_log WHERE application_id = {app_id} ORDER BY id DESC")
         data['calls'] = [{'id': c[0], 'result': c[1], 'comment': c[2], 'createdAt': str(c[3])[:16]} for c in cur.fetchall()]
         data['loansCount'] = loans[0]
@@ -104,6 +108,23 @@ def handler(event: dict, context) -> dict:
         if not text:
             return resp(400, {'error': 'Пустая заметка'})
         cur.execute(f"INSERT INTO {SCHEMA}.application_notes (application_id, text) VALUES ({app_id}, {esc(text)})")
+        return resp(200, {'success': True})
+
+    if action == 'video_review':
+        cur.execute(f"SELECT client_id FROM {SCHEMA}.applications WHERE id = {app_id}")
+        row = cur.fetchone()
+        if not row:
+            return resp(404, {'error': 'Заявка не найдена'})
+        decision = body.get('decision')
+        reason = str(body.get('reason', '')).strip()
+        if decision not in ('approved', 'rejected'):
+            return resp(400, {'error': 'Неверное решение'})
+        cur.execute(f"UPDATE {SCHEMA}.video_checks SET status = {esc(decision)}, reject_reason = {esc(reason)}, checked_at = NOW() WHERE id = (SELECT MAX(id) FROM {SCHEMA}.video_checks WHERE client_id = {row[0]})")
+        if decision == 'approved':
+            cur.execute(f"INSERT INTO {SCHEMA}.notifications (client_id, text) VALUES ({row[0]}, 'Видеоидентификация пройдена.')")
+        else:
+            note = 'Видео не принято, запишите его заново.' + (f' Причина: {reason}' if reason else '')
+            cur.execute(f"INSERT INTO {SCHEMA}.notifications (client_id, text) VALUES ({row[0]}, {esc(note)})")
         return resp(200, {'success': True})
 
     if action in ('doc_review', 'phone_verify', 'log_call', 'request_confirm'):

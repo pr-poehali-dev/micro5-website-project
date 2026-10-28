@@ -245,6 +245,23 @@ def handler(event: dict, context) -> dict:
         cur.execute(f"INSERT INTO {SCHEMA}.client_documents (client_id, kind, url) VALUES ({cid}, {esc(kind)}, {esc(cdn_url(key))})")
         return resp(200, {'success': True, 'url': cdn_url(key)})
 
+    if action == 'upload_video':
+        raw = body.get('data', '')
+        if ',' in raw:
+            raw = raw.split(',', 1)[1]
+        data = base64.b64decode(raw)
+        if len(data) > 8 * 1024 * 1024:
+            return resp(400, {'error': 'Видео слишком большое, запишите покороче'})
+        mime = str(body.get('mime', 'video/webm'))
+        ext = 'mp4' if 'mp4' in mime else 'webm'
+        key = f"videos/{cid}/check-{secrets.token_hex(8)}.{ext}"
+        s3_client().put_object(Bucket='files', Key=key, Body=data, ContentType='video/mp4' if ext == 'mp4' else 'video/webm')
+        auto_ok = 'TRUE' if body.get('autoOk') else 'FALSE'
+        issues = str(body.get('autoIssues', ''))[:500]
+        cur.execute(f"INSERT INTO {SCHEMA}.video_checks (client_id, url, auto_ok, auto_issues) VALUES ({cid}, {esc(cdn_url(key))}, {auto_ok}, {esc(issues)})")
+        notify(cur, cid, 'Видео отправлено оператору на проверку.')
+        return resp(200, {'success': True})
+
     if action == 'confirm_data':
         answer = body.get('answer')
         comment = str(body.get('comment', '')).strip()
@@ -288,8 +305,11 @@ def handler(event: dict, context) -> dict:
     payments = [{'id': r[0], 'loan': f'LOAN-{r[1]:03d}', 'kind': r[2], 'amount': r[3], 'note': r[4], 'date': str(r[5])[:16]} for r in cur.fetchall()]
     cur.execute(f"SELECT kind, url, status, reject_reason FROM {SCHEMA}.client_documents WHERE client_id = {cid}")
     docs = {r[0]: {'url': r[1], 'status': r[2], 'reason': r[3]} for r in cur.fetchall()}
+    cur.execute(f"SELECT status, reject_reason, created_at FROM {SCHEMA}.video_checks WHERE client_id = {cid} ORDER BY id DESC LIMIT 1")
+    vr = cur.fetchone()
+    video = {'status': vr[0], 'reason': vr[1], 'date': str(vr[2])[:16]} if vr else None
     cur.execute(f"SELECT COUNT(*) FROM {SCHEMA}.applications WHERE client_id = {cid} AND data_confirm = 'requested'")
     confirm_requested = cur.fetchone()[0] > 0
     cur.execute(f"SELECT id, text, is_read, created_at FROM {SCHEMA}.notifications WHERE client_id = {cid} ORDER BY id DESC LIMIT 30")
     notes = [{'id': r[0], 'text': re.sub(r'\s*\[LOAN-[^\]]*\]$', '', r[1]), 'isRead': r[2], 'date': str(r[3])[:16]} for r in cur.fetchall()]
-    return resp(200, {'profile': profile(cur, cid), 'loans': loans, 'applications': apps, 'payments': payments, 'documents': docs, 'notifications': notes, 'confirmRequested': confirm_requested})
+    return resp(200, {'profile': profile(cur, cid), 'loans': loans, 'applications': apps, 'payments': payments, 'documents': docs, 'notifications': notes, 'confirmRequested': confirm_requested, 'video': video})
