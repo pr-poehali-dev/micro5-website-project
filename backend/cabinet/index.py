@@ -38,40 +38,204 @@ def notify(cur, cid, text):
     cur.execute(f"INSERT INTO {SCHEMA}.notifications (client_id, text) VALUES ({int(cid)}, {esc(text)})")
 
 
+COMPANY = 'ООО «Частный займ»'
+BLUE = (0.10, 0.20, 0.62)
+
+
+def draw_stamp(c, cx, cy, signed_text):
+    import math
+    c.saveState()
+    c.setStrokeColorRGB(*BLUE)
+    c.setFillColorRGB(*BLUE)
+    c.setLineWidth(1.6)
+    c.circle(cx, cy, 52, stroke=1, fill=0)
+    c.setLineWidth(0.8)
+    c.circle(cx, cy, 47, stroke=1, fill=0)
+    c.circle(cx, cy, 27, stroke=1, fill=0)
+
+    def arc_text(text, radius, top):
+        c.setFont('DVB', 8)
+        n = len(text)
+        span = min(math.radians(18) * n, math.radians(200))
+        step = span / max(n - 1, 1)
+        for i, ch in enumerate(text):
+            if top:
+                ang = math.pi / 2 + span / 2 - i * step
+                x, y = cx + radius * math.cos(ang), cy + radius * math.sin(ang)
+                rot = math.degrees(ang) - 90
+            else:
+                ang = 3 * math.pi / 2 - span / 2 + i * step
+                x, y = cx + radius * math.cos(ang), cy + radius * math.sin(ang)
+                rot = math.degrees(ang) + 90
+            c.saveState()
+            c.translate(x, y)
+            c.rotate(rot)
+            c.drawCentredString(0, 0, ch)
+            c.restoreState()
+
+    arc_text('ООО «ЧАСТНЫЙ ЗАЙМ»', 37, True)
+    arc_text('ДОГОВОР ЗАЙМА', 37, False)
+    c.setFont('DVB', 9)
+    c.drawCentredString(cx, cy + 2, 'ДЛЯ')
+    c.drawCentredString(cx, cy - 8, 'ДОГОВОРОВ')
+    c.restoreState()
+
+
+def draw_scribble(c, x, y, color=BLUE):
+    c.saveState()
+    c.setStrokeColorRGB(*color)
+    c.setLineWidth(1.4)
+    p = c.beginPath()
+    p.moveTo(x, y)
+    p.curveTo(x + 10, y + 26, x + 18, y - 8, x + 28, y + 16)
+    p.curveTo(x + 36, y + 30, x + 40, y - 6, x + 52, y + 12)
+    p.curveTo(x + 62, y + 24, x + 70, y + 2, x + 84, y + 10)
+    c.drawPath(p, stroke=1, fill=0)
+    c.restoreState()
+
+
 def build_contract(loan, prof):
+    from reportlab.lib.utils import simpleSplit
     base = os.path.dirname(__file__)
     pdfmetrics.registerFont(TTFont('DV', os.path.join(base, 'DejaVuSans.ttf')))
     pdfmetrics.registerFont(TTFont('DVB', os.path.join(base, 'DejaVuSans-Bold.ttf')))
     buf = io.BytesIO()
     c = canvas.Canvas(buf, pagesize=A4)
     w, h = A4
-    y = h - 60
-    c.setFont('DVB', 16)
-    c.drawString(50, y, f"Договор займа № {loan['num']}")
-    y -= 34
-    c.setFont('DV', 11)
-    lines = [
-        f"Заимодавец: Микро5",
-        f"Заёмщик: {prof['fullName'] or '—'}",
-        f"Телефон: +7{prof['phone']}",
-        f"Паспорт: {prof['passportSeries']} {prof['passportNumber']}",
-        '',
-        f"Сумма займа: {loan['amount']:,} ₽".replace(',', ' '),
-        f"Срок займа: {loan['days']} дн.",
-        "Процентная ставка: " + ("0% (акция для первого займа)" if loan['returnAmount'] == loan['amount'] else "0.08% в день"),
-        f"Сумма к возврату: {loan['returnAmount']:,} ₽".replace(',', ' '),
-        f"Дата возврата: {loan['dueDate']}",
-        '',
-        "1. Заимодавец перечисляет сумму займа на банковскую карту заёмщика.",
-        "2. Заёмщик возвращает сумму займа и начисленные проценты в срок, указанный в договоре.",
-        "3. Срок возврата может быть продлён по заявлению заёмщика в личном кабинете.",
-        "4. Договор подписывается простой электронной подписью заёмщика.",
-        '',
-        f"Статус подписания: {loan['signText']}",
-    ]
-    for line in lines:
-        c.drawString(50, y, line)
-        y -= 20
+    left, right = 50, w - 50
+    state = {'y': h - 55}
+
+    def money(n):
+        return f"{int(n):,} ₽".replace(',', ' ')
+
+    def need(space):
+        if state['y'] - space < 60:
+            c.showPage()
+            state['y'] = h - 55
+
+    def heading(text):
+        need(40)
+        c.setFont('DVB', 12)
+        c.setFillColorRGB(*BLUE)
+        c.drawString(left, state['y'], text)
+        c.setFillColorRGB(0, 0, 0)
+        state['y'] -= 6
+        c.setStrokeColorRGB(*BLUE)
+        c.setLineWidth(0.6)
+        c.line(left, state['y'], right, state['y'])
+        state['y'] -= 16
+
+    def row(label, value):
+        need(20)
+        c.setFont('DV', 9.5)
+        c.setFillColorRGB(0.35, 0.35, 0.35)
+        c.drawString(left, state['y'], label)
+        c.setFillColorRGB(0, 0, 0)
+        c.setFont('DVB', 9.5)
+        lines = simpleSplit(str(value or '—'), 'DVB', 9.5, right - 230)
+        for i, ln in enumerate(lines):
+            c.drawString(230, state['y'] - i * 12, ln)
+        state['y'] -= 15 + (len(lines) - 1) * 12
+
+    def para(text):
+        c.setFont('DV', 9.5)
+        for ln in simpleSplit(text, 'DV', 9.5, right - left):
+            need(14)
+            c.setFont('DV', 9.5)
+            c.drawString(left, state['y'], ln)
+            state['y'] -= 13
+        state['y'] -= 3
+
+    c.setFont('DVB', 17)
+    c.drawString(left, state['y'], f"Договор займа № {loan['num']}")
+    state['y'] -= 18
+    c.setFont('DV', 9.5)
+    c.setFillColorRGB(0.35, 0.35, 0.35)
+    c.drawString(left, state['y'], f"Дата заключения: {loan['issuedAt']}    Статус: {loan['statusText']}")
+    c.setFillColorRGB(0, 0, 0)
+    state['y'] -= 26
+
+    heading('Стороны договора')
+    row('Займодавец', COMPANY)
+    row('Заёмщик', prof['fullName'])
+    row('Дата рождения', prof['birthDate'])
+    row('Телефон', '+7' + prof['phone'] if prof['phone'] else '')
+    row('Email', prof['email'])
+    row('Паспорт', f"{prof['passportSeries']} {prof['passportNumber']}".strip())
+    row('Дата выдачи паспорта', prof['passportDate'])
+    row('Кем выдан', prof['passportIssuer'])
+    row('Адрес', prof['address'])
+    state['y'] -= 6
+
+    heading('Условия займа')
+    row('Сумма займа', money(loan['amount']))
+    row('Срок займа', f"{loan['days']} дн.")
+    row('Процентная ставка', '0% (акция для первого займа)' if loan['returnAmount'] == loan['amount'] else '0.08% в день')
+    row('Начисленные проценты', money(loan['returnAmount'] - loan['amount']))
+    row('Сумма к возврату', money(loan['returnAmount']))
+    row('Дата выдачи займа', loan['paidOutAt'] or 'после подписания договора')
+    row('Срок возврата', loan['dueDate'])
+    row('Продлений', f"{loan['extendedCount']} из {MAX_EXTENDS}")
+    row('Способ выдачи', f"На карту •••• {prof['cardLast4']} ({prof['cardBank']})" if prof['cardLast4'] else 'На банковскую карту заёмщика')
+    state['y'] -= 6
+
+    if loan['payments']:
+        heading('Платежи по займу')
+        for pay in loan['payments']:
+            row(pay['date'], f"{pay['note']}: {money(pay['amount'])}")
+        state['y'] -= 6
+
+    heading('Основные положения')
+    para('1. Займодавец перечисляет сумму займа на банковскую карту заёмщика после подписания договора.')
+    para('2. Заёмщик возвращает сумму займа и начисленные проценты не позднее срока возврата, указанного в договоре.')
+    para('3. Срок возврата может быть продлён по заявлению заёмщика в личном кабинете с оплатой процентов за дополнительные дни.')
+    para('4. Заёмщик подтверждает, что указанные им персональные данные верны, и соглашается на их обработку для исполнения договора.')
+    para('5. Договор подписывается простой электронной подписью заёмщика и имеет силу собственноручной подписи.')
+    state['y'] -= 8
+
+    need(150)
+    heading('Подписи сторон')
+    top = state['y']
+    c.setFont('DVB', 10)
+    c.drawString(left, top, 'Займодавец')
+    c.setFont('DV', 9.5)
+    c.drawString(left, top - 15, COMPANY)
+    draw_stamp(c, left + 62, top - 88, '')
+    draw_scribble(c, left + 10, top - 78)
+    c.setStrokeColorRGB(0, 0, 0)
+    c.setLineWidth(0.5)
+    c.line(left, top - 100, left + 150, top - 100)
+    c.setFont('DV', 8)
+    c.drawString(left, top - 112, 'Подпись представителя, М.П.')
+
+    x2 = left + 280
+    c.setFont('DVB', 10)
+    c.drawString(x2, top, 'Заёмщик')
+    c.setFont('DV', 9.5)
+    c.drawString(x2, top - 15, prof['fullName'] or '—')
+    if loan['signedAt']:
+        c.setFillColorRGB(0.92, 0.97, 0.93)
+        c.setStrokeColorRGB(0.1, 0.55, 0.3)
+        c.roundRect(x2, top - 85, 205, 56, 6, stroke=1, fill=1)
+        c.setFillColorRGB(0.05, 0.4, 0.2)
+        c.setFont('DVB', 9)
+        c.drawString(x2 + 10, top - 45, 'Подписано электронной подписью')
+        c.setFont('DV', 8.5)
+        c.drawString(x2 + 10, top - 58, loan['signedAt'])
+        c.drawString(x2 + 10, top - 70, f"Тел. +7{prof['phone']}")
+        c.setFillColorRGB(0, 0, 0)
+        draw_scribble(c, x2 + 110, top - 72, (0.1, 0.25, 0.55))
+    else:
+        c.setFont('DV', 9)
+        c.setFillColorRGB(0.7, 0.2, 0.2)
+        c.drawString(x2, top - 55, 'Ожидает подписи заёмщика')
+        c.setFillColorRGB(0, 0, 0)
+    c.setStrokeColorRGB(0, 0, 0)
+    c.setLineWidth(0.5)
+    c.line(x2, top - 100, x2 + 205, top - 100)
+    c.setFont('DV', 8)
+    c.drawString(x2, top - 112, 'Подпись заёмщика')
+
     c.showPage()
     c.save()
     return buf.getvalue()
@@ -221,8 +385,13 @@ def handler(event: dict, context) -> dict:
         row = cur.fetchone()
         if not row:
             return resp(404, {'error': 'Договор не найден'})
-        loan = {'num': f'LOAN-{row[0]:03d}', 'amount': row[1], 'returnAmount': row[2], 'dueDate': row[3].strftime('%d.%m.%Y'), 'days': row[6],
-                'signText': ('подписан ' + row[8].strftime('%d.%m.%Y %H:%M')) if row[8] else 'ожидает подписи'}
+        cur.execute(f"SELECT kind, amount, note, created_at FROM {SCHEMA}.payments WHERE loan_id = {loan_id} AND client_id = {cid} ORDER BY id")
+        pays = [{'amount': x[1], 'note': x[2], 'date': x[3].strftime('%d.%m.%Y')} for x in cur.fetchall()]
+        status_names = {'awaiting_sign': 'ожидает подписи', 'signed': 'подписан, ожидает выплаты', 'active': 'действует', 'overdue': 'просрочен', 'paid': 'займ погашен'}
+        loan = {'num': f'LOAN-{row[0]:03d}', 'amount': row[1], 'returnAmount': row[2], 'dueDate': row[3].strftime('%d.%m.%Y'),
+                'days': row[6], 'issuedAt': (row[8] or row[5]).strftime('%d.%m.%Y'),
+                'paidOutAt': row[9].strftime('%d.%m.%Y %H:%M') if row[9] else '', 'extendedCount': row[10],
+                'signedAt': row[8].strftime('%d.%m.%Y %H:%M') if row[8] else '', 'statusText': status_names.get(row[4], row[4]), 'payments': pays}
         pdf = build_contract(loan, profile(cur, cid))
         key = f"contracts/{cid}/{loan['num']}-{secrets.token_hex(8)}.pdf"
         s3_client().put_object(Bucket='files', Key=key, Body=pdf, ContentType='application/pdf')
