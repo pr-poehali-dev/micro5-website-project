@@ -1,30 +1,45 @@
 import React, { useEffect, useState } from 'react';
 import { callCabinet, clearToken } from '@/lib/cabinetApi';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import LoanSteps from '@/components/LoanSteps';
+import ActiveLoanCard from '@/components/ActiveLoanCard';
+import DocumentsUpload from '@/components/DocumentsUpload';
+import NewApplicationCard from '@/components/NewApplicationCard';
+import NotificationsBell, { NotificationItem } from '@/components/NotificationsBell';
 
 interface LoanData {
   id: string;
   dbId: number;
-  days: number;
   amount: number;
   returnAmount: number;
   dueDate: string;
+  days: number;
   status: 'active' | 'overdue' | 'paid' | 'awaiting_sign' | 'signed';
   daysLeft: number;
+  signedAt: string;
+  extendedCount: number;
+  canExtend: boolean;
 }
 
 interface ApplicationData {
   id: string;
   amount: number;
   date: string;
-  status: 'pending' | 'approved' | 'rejected' | 'processing';
+  status: 'new' | 'in_work' | 'approved' | 'rejected';
   statusText: string;
+}
+
+interface PaymentData {
+  id: number;
+  loan: string;
+  kind: 'repay' | 'extend';
+  amount: number;
+  note: string;
+  date: string;
 }
 
 interface DashboardProps {
@@ -32,31 +47,59 @@ interface DashboardProps {
   onLogout: () => void;
 }
 
+const LOAN_STATUS: Record<string, { label: string; cls: string }> = {
+  active: { label: 'Активный', cls: 'bg-micro-blue text-white' },
+  overdue: { label: 'Просрочен', cls: 'bg-micro-green text-white' },
+  paid: { label: 'Погашен', cls: 'bg-slate-500 text-white' },
+  awaiting_sign: { label: 'Ждёт подписи', cls: 'bg-amber-500 text-white' },
+  signed: { label: 'Ждёт выплаты', cls: 'bg-amber-500 text-white' },
+};
+
+const APP_STATUS: Record<string, { label: string; cls: string }> = {
+  new: { label: 'На рассмотрении', cls: 'bg-micro-blue text-white' },
+  in_work: { label: 'В работе', cls: 'bg-amber-500 text-white' },
+  approved: { label: 'Одобрена', cls: 'bg-emerald-600 text-white' },
+  rejected: { label: 'Отклонена', cls: 'bg-micro-green text-white' },
+};
+
+const money = (n: number) => `${n.toLocaleString()} ₽`;
+const dateRu = (d: string) => new Date(d).toLocaleDateString('ru-RU');
+
+const PROFILE_FIELDS: [string, string][] = [
+  ['fullName', 'ФИО'], ['email', 'Email'], ['birthDate', 'Дата рождения'],
+  ['address', 'Адрес'], ['income', 'Доход'], ['employment', 'Занятость'],
+];
+
+const TAB_CLS = 'flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-md data-[state=active]:bg-micro-blue data-[state=active]:text-white';
+
 const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
   const [activeTab, setActiveTab] = useState('overview');
-
   const [loans, setLoans] = useState<LoanData[]>([]);
   const [applications, setApplications] = useState<ApplicationData[]>([]);
+  const [payments, setPayments] = useState<PaymentData[]>([]);
+  const [documents, setDocuments] = useState<Record<string, string>>({});
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [profile, setProfile] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [downloading, setDownloading] = useState('');
 
-  const reload = () =>
-    callCabinet({ action: 'me' }).then((d) => {
-      setLoans(d.loans);
-      setApplications(d.applications);
-      setProfile(d.profile);
-    });
+  const apply = (d: any) => {
+    setLoans(d.loans);
+    setApplications(d.applications);
+    setPayments(d.payments);
+    setDocuments(d.documents);
+    setNotifications(d.notifications);
+    setProfile(d.profile);
+  };
+
+  const reload = () => callCabinet({ action: 'me' }).then(apply);
 
   useEffect(() => {
     callCabinet({ action: 'me' })
-      .then((d) => {
-        setLoans(d.loans);
-        setApplications(d.applications);
-        setProfile(d.profile);
-      })
+      .then(apply)
       .catch(() => {
         clearToken();
         onLogout();
@@ -65,14 +108,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
   }, []);
 
   const startEdit = () => {
-    setForm({
-      fullName: profile.fullName || '',
-      email: profile.email || '',
-      birthDate: profile.birthDate || '',
-      address: profile.address || '',
-      income: profile.income || '',
-      employment: profile.employment || '',
-    });
+    setForm(Object.fromEntries(PROFILE_FIELDS.map(([k]) => [k, profile[k] || ''])));
     setEditing(true);
   };
 
@@ -87,70 +123,47 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-micro-blue text-white';
-      case 'overdue': return 'bg-red-500 text-white';
-      case 'paid': return 'bg-slate-500 text-white';
-      case 'awaiting_sign': return 'bg-amber-500 text-white';
-      case 'signed': return 'bg-amber-500 text-white';
-      case 'pending': return 'bg-yellow-500 text-white';
-      case 'approved': return 'bg-micro-blue text-white';
-      case 'rejected': return 'bg-red-500 text-white';
-      case 'processing': return 'bg-blue-400 text-white';
-      default: return 'bg-gray-500 text-white';
+  const downloadContract = async (loan: LoanData) => {
+    setDownloading(loan.id);
+    try {
+      const d = await callCabinet({ action: 'contract', loanId: loan.dbId });
+      window.open(d.url, '_blank');
+    } finally {
+      setDownloading('');
     }
   };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'active': return 'Clock';
-      case 'overdue': return 'AlertTriangle';
-      case 'paid': return 'CheckCircle';
-      case 'pending': return 'Clock';
-      case 'approved': return 'CheckCircle';
-      case 'rejected': return 'XCircle';
-      case 'processing': return 'Loader2';
-      default: return 'Circle';
-    }
-  };
-
-  const activeLoan = loans.find(loan => loan.status === 'active');
-  const pendingLoans = loans.filter(loan => loan.status === 'awaiting_sign' || loan.status === 'signed');
-  const totalBorrowed = loans.reduce((sum, loan) => sum + loan.amount, 0);
-  const totalPaid = loans.filter(loan => loan.status === 'paid').reduce((sum, loan) => sum + loan.returnAmount, 0);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-gray-600">Загружаем данные...</div>;
   }
 
+  const activeLoan = loans.find((l) => l.status === 'active' || l.status === 'overdue');
+  const pendingLoans = loans.filter((l) => l.status === 'awaiting_sign' || l.status === 'signed');
+  const openApplication = applications.find((a) => a.status === 'new' || a.status === 'in_work');
+  const canReapply = !activeLoan && pendingLoans.length === 0 && !openApplication;
+  const totalBorrowed = loans.filter((l) => l.status !== 'awaiting_sign' && l.status !== 'signed').reduce((s, l) => s + l.amount, 0);
+  const totalPaid = payments.reduce((s, p) => s + p.amount, 0);
+  const docsDone = !!documents.passport && !!documents.selfie;
+  const phoneText = profile.phone ? '+7' + profile.phone : userPhone;
+
   return (
     <div className="min-h-screen bg-micro-gray">
-      {/* Header */}
       <header className="bg-white border-b-2 border-micro-blue sticky top-0 z-50">
-        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
+        <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3">
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-micro-blue rounded-md flex items-center justify-center">
-                <span className="text-white font-bold text-lg">М5</span>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 shrink-0 bg-micro-blue rounded-md flex items-center justify-center">
+                <span className="text-white font-bold">М5</span>
               </div>
-              <div>
-                <span className="text-lg sm:text-2xl font-bold text-micro-dark">Личный кабинет</span>
-                <p className="text-sm text-gray-600">{profile.phone ? '+7' + profile.phone : userPhone}</p>
+              <div className="min-w-0">
+                <p className="font-semibold text-micro-dark leading-tight truncate">{profile.fullName || 'Личный кабинет'}</p>
+                <p className="text-sm text-gray-600">{phoneText}</p>
               </div>
             </div>
-            
-            <div className="flex items-center space-x-1 sm:space-x-4">
-              <Button variant="outline" className="rounded-md hidden sm:inline-flex">
-                <Icon name="Phone" size={16} className="mr-2" />
-                Поддержка
-              </Button>
-              <Button 
-                variant="ghost" 
-                onClick={onLogout}
-                className="rounded-md text-gray-600"
-              >
-                <Icon name="LogOut" size={16} className="sm:mr-2" />
+            <div className="flex items-center gap-1">
+              <NotificationsBell items={notifications} onRead={reload} />
+              <Button variant="ghost" onClick={onLogout} className="text-gray-600 px-2 sm:px-4">
+                <Icon name="LogOut" size={18} className="sm:mr-2" />
                 <span className="hidden sm:inline">Выйти</span>
               </Button>
             </div>
@@ -158,331 +171,174 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
         </div>
       </header>
 
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 pb-24 sm:pb-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 h-auto bg-white rounded-lg p-1 shadow-sm fixed bottom-2 left-2 right-2 z-50 w-auto sm:static sm:w-full">
-            <TabsTrigger value="overview" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-md data-[state=active]:bg-micro-blue data-[state=active]:text-white">
-              <Icon name="LayoutDashboard" size={18} className="sm:mr-2" />
-              Обзор
-            </TabsTrigger>
-            <TabsTrigger value="loans" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-md data-[state=active]:bg-micro-blue data-[state=active]:text-white">
-              <Icon name="CreditCard" size={18} className="sm:mr-2" />
-              Займы
-            </TabsTrigger>
-            <TabsTrigger value="applications" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-md data-[state=active]:bg-micro-blue data-[state=active]:text-white">
-              <Icon name="FileText" size={18} className="sm:mr-2" />
-              Заявки
-            </TabsTrigger>
-            <TabsTrigger value="contracts" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-md data-[state=active]:bg-micro-blue data-[state=active]:text-white">
-              <Icon name="FileSignature" size={18} className="sm:mr-2" />
-              Договоры
-            </TabsTrigger>
-            <TabsTrigger value="profile" className="flex-col sm:flex-row gap-0.5 px-1 py-2 text-[11px] sm:text-sm rounded-md data-[state=active]:bg-micro-blue data-[state=active]:text-white">
-              <Icon name="UserRound" size={18} className="sm:mr-2" />
-              Анкета
-            </TabsTrigger>
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-8 pb-28 sm:pb-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
+          <TabsList className="grid grid-cols-5 h-auto bg-white rounded-lg p-1 border border-slate-200 fixed bottom-2 left-2 right-2 z-50 sm:static">
+            <TabsTrigger value="overview" className={TAB_CLS}><Icon name="LayoutDashboard" size={18} className="sm:mr-2" />Обзор</TabsTrigger>
+            <TabsTrigger value="loans" className={TAB_CLS}><Icon name="CreditCard" size={18} className="sm:mr-2" />Займы</TabsTrigger>
+            <TabsTrigger value="applications" className={TAB_CLS}><Icon name="FileText" size={18} className="sm:mr-2" />Заявки</TabsTrigger>
+            <TabsTrigger value="contracts" className={TAB_CLS}><Icon name="FileSignature" size={18} className="sm:mr-2" />Договоры</TabsTrigger>
+            <TabsTrigger value="profile" className={TAB_CLS}><Icon name="UserRound" size={18} className="sm:mr-2" />Анкета</TabsTrigger>
           </TabsList>
 
-          {/* Обзор */}
-          <TabsContent value="overview" className="space-y-6">
+          <TabsContent value="overview" className="space-y-4">
             {pendingLoans.map((loan) => (
               <LoanSteps key={loan.id} loan={loan} fullName={profile.fullName || ''} onChanged={reload} />
             ))}
-            <div className="grid md:grid-cols-3 gap-4 sm:gap-4 sm:p-6">
-              <Card className="bg-micro-blue text-white rounded-lg border border-slate-200">
-                <CardContent className="p-4 sm:p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <Icon name="Wallet" size={24} />
-                    <Badge className="bg-white/20 text-white">Активный займ</Badge>
-                  </div>
-                  <h3 className="text-2xl font-bold mb-1">
-                    {activeLoan ? `${activeLoan.amount.toLocaleString()} ₽` : 'Нет займов'}
-                  </h3>
-                  <p className="text-blue-100">
-                    {activeLoan ? `К возврату: ${activeLoan.returnAmount.toLocaleString()} ₽` : 'Можете оформить новый займ'}
-                  </p>
-                </CardContent>
-              </Card>
 
-              <Card className="bg-micro-green text-white rounded-lg border border-slate-200">
-                <CardContent className="p-4 sm:p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <Icon name="TrendingUp" size={24} />
-                    <Badge className="bg-white/20 text-white">Всего займов</Badge>
-                  </div>
-                  <h3 className="text-2xl font-bold mb-1">{totalBorrowed.toLocaleString()} ₽</h3>
-                  <p className="text-red-100">Общая сумма займов</p>
-                </CardContent>
-              </Card>
+            {activeLoan && <ActiveLoanCard loan={activeLoan} onChanged={reload} />}
 
-              <Card className="bg-micro-dark text-white rounded-lg border border-slate-200">
-                <CardContent className="p-4 sm:p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <Icon name="CheckCircle" size={24} />
-                    <Badge className="bg-white/20 text-white">Погашено</Badge>
+            {openApplication && (
+              <Card className="rounded-lg border border-slate-200 bg-white">
+                <CardContent className="p-4 sm:p-6 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-micro-dark">Заявка {openApplication.id} на {money(openApplication.amount)}</p>
+                    <p className="text-sm text-gray-600">{openApplication.statusText}</p>
                   </div>
-                  <h3 className="text-2xl font-bold mb-1">{totalPaid.toLocaleString()} ₽</h3>
-                  <p className="text-red-100">Выплачено всего</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {activeLoan && (
-              <Card className="rounded-lg border border-slate-200 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Icon name="Calendar" size={20} className="mr-2 text-micro-blue" />
-                    Активный займ
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-gray-600">Номер займа</p>
-                      <p className="font-semibold">{activeLoan.id}</p>
-                    </div>
-                    <Badge className={getStatusColor(activeLoan.status)}>
-                      Активный
-                    </Badge>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Сумма займа:</span>
-                      <span className="font-semibold">{activeLoan.amount.toLocaleString()} ₽</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">К возврату:</span>
-                      <span className="font-semibold text-micro-blue">{activeLoan.returnAmount.toLocaleString()} ₽</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Дата возврата:</span>
-                      <span className="font-semibold">{new Date(activeLoan.dueDate).toLocaleDateString('ru-RU')}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Осталось дней:</span>
-                      <span className="font-semibold text-micro-green">{activeLoan.daysLeft}</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Прогресс до возврата</span>
-                      <span className="text-sm font-medium">{Math.round((30 - activeLoan.daysLeft) / 30 * 100)}%</span>
-                    </div>
-                    <Progress value={(30 - activeLoan.daysLeft) / 30 * 100} className="h-2" />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Button className="flex-1 bg-micro-green hover:bg-red-700 rounded-md">
-                      <Icon name="CreditCard" size={16} className="mr-2" />
-                      Погасить займ
-                    </Button>
-                    <Button variant="outline" className="flex-1 rounded-md">
-                      <Icon name="Download" size={16} className="mr-2" />
-                      Скачать договор
-                    </Button>
-                  </div>
+                  <Badge className={APP_STATUS[openApplication.status].cls}>{APP_STATUS[openApplication.status].label}</Badge>
                 </CardContent>
               </Card>
             )}
 
-            <Card className="rounded-lg border border-slate-200 shadow-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Icon name="Plus" size={20} className="mr-2 text-micro-blue" />
-                  Оформить новый займ
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-6">
-                  Получите займ до 50 000 ₽ на срок до 30 дней
-                </p>
-                <Button className="w-full bg-micro-blue hover:bg-blue-800 rounded-md py-3">
-                  <Icon name="Calculator" size={16} className="mr-2" />
-                  Рассчитать займ
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
+            {!docsDone && <DocumentsUpload documents={documents} onChanged={reload} />}
 
-          {/* Займы */}
-          <TabsContent value="loans" className="space-y-6">
-            <div className="space-y-4">
-              {loans.length === 0 && <p className="text-center text-gray-600 py-8">Займов пока нет</p>}
-              {loans.map((loan) => (
-                <Card key={loan.id} className="rounded-lg border border-slate-200 shadow-sm hover:border-micro-blue transition-shadow">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="font-semibold text-lg">{loan.id}</h3>
-                        <p className="text-gray-600">Займ на {loan.amount.toLocaleString()} ₽</p>
-                      </div>
-                      <Badge className={getStatusColor(loan.status)}>
-                        <Icon name={getStatusIcon(loan.status) as any} size={14} className="mr-1" />
-                        {loan.status === 'active' ? 'Активный' : 
-                         loan.status === 'paid' ? 'Погашен' :
-                         loan.status === 'awaiting_sign' ? 'Ждёт подписи' :
-                         loan.status === 'signed' ? 'Ждёт выплаты' : 'Просрочен'}
-                      </Badge>
-                    </div>
+            {canReapply && <NewApplicationCard onCreated={reload} />}
 
-                    <div className="grid md:grid-cols-3 gap-4">
-                      <div>
-                        <p className="text-sm text-gray-600">Сумма займа</p>
-                        <p className="font-semibold">{loan.amount.toLocaleString()} ₽</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">К возврату</p>
-                        <p className="font-semibold">{loan.returnAmount.toLocaleString()} ₽</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Срок возврата</p>
-                        <p className="font-semibold">{new Date(loan.dueDate).toLocaleDateString('ru-RU')}</p>
-                      </div>
-                    </div>
-
-                    {loan.status === 'active' && (
-                      <div className="mt-4 pt-4 border-t border-gray-200">
-                        <div className="flex flex-col sm:flex-row gap-3">
-                          <Button size="sm" className="bg-micro-green hover:bg-red-700 rounded-md">
-                            Погасить
-                          </Button>
-                          <Button size="sm" variant="outline" className="rounded-md">
-                            Продлить
-                          </Button>
-                          <Button size="sm" variant="ghost" className="rounded-md">
-                            Подробнее
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="grid grid-cols-2 gap-3">
+              <Card className="rounded-lg border border-slate-200 bg-white">
+                <CardContent className="p-4">
+                  <p className="text-sm text-gray-600">Взято всего</p>
+                  <p className="text-xl font-semibold text-micro-dark">{money(totalBorrowed)}</p>
+                </CardContent>
+              </Card>
+              <Card className="rounded-lg border border-slate-200 bg-white">
+                <CardContent className="p-4">
+                  <p className="text-sm text-gray-600">Выплачено всего</p>
+                  <p className="text-xl font-semibold text-micro-dark">{money(totalPaid)}</p>
+                </CardContent>
+              </Card>
             </div>
+
+            {docsDone && <DocumentsUpload documents={documents} onChanged={reload} />}
           </TabsContent>
 
-          {/* Заявки */}
-          <TabsContent value="applications" className="space-y-6">
-            <div className="space-y-4">
-              {applications.length === 0 && <p className="text-center text-gray-600 py-8">Заявок пока нет</p>}
-              {applications.map((app) => (
-                <Card key={app.id} className="rounded-lg border border-slate-200 shadow-sm hover:border-micro-blue transition-shadow">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="font-semibold text-lg">{app.id}</h3>
-                        <p className="text-gray-600">Заявка на {app.amount.toLocaleString()} ₽</p>
-                        <p className="text-sm text-gray-500">{new Date(app.date).toLocaleDateString('ru-RU')}</p>
-                      </div>
-                      <Badge className={getStatusColor(app.status)}>
-                        <Icon name={getStatusIcon(app.status) as any} size={14} className="mr-1" />
-                        {app.status === 'pending' ? 'Ожидает' :
-                         app.status === 'approved' ? 'Одобрена' :
-                         app.status === 'rejected' ? 'Отклонена' : 'Обработка'}
-                      </Badge>
-                    </div>
-
-                    <div className="bg-micro-gray rounded-md p-4">
-                      <p className="text-sm font-medium text-micro-dark">{app.statusText}</p>
-                      {app.status === 'processing' && (
-                        <div className="mt-2">
-                          <div className="flex justify-between text-xs text-gray-600 mb-1">
-                            <span>Проверка документов</span>
-                            <span>75%</span>
-                          </div>
-                          <Progress value={75} className="h-1" />
-                        </div>
-                      )}
-                    </div>
-
-                    {app.status === 'approved' && (
-                      <div className="mt-4 pt-4 border-t border-gray-200">
-                        <Button size="sm" className="bg-micro-blue hover:bg-blue-800 rounded-md">
-                          <Icon name="Download" size={14} className="mr-2" />
-                          Получить деньги
-                        </Button>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="contracts" className="space-y-4">
-            {loans.length === 0 && <p className="text-center text-gray-600 py-8">Договоров пока нет</p>}
+          <TabsContent value="loans" className="space-y-3">
+            {loans.length === 0 && <p className="text-center text-gray-600 py-8">Займов пока нет</p>}
             {loans.map((loan) => (
-              <Card key={loan.id} className="rounded-lg border border-slate-200 shadow-sm">
-                <CardContent className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <Card key={loan.id} className="rounded-lg border border-slate-200 bg-white">
+                <CardContent className="p-4 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-micro-dark">{loan.id} · {money(loan.amount)}</p>
+                    <p className="text-sm text-gray-600">К возврату {money(loan.returnAmount)} до {dateRu(loan.dueDate)}</p>
+                  </div>
+                  <Badge className={LOAN_STATUS[loan.status]?.cls}>{LOAN_STATUS[loan.status]?.label}</Badge>
+                </CardContent>
+              </Card>
+            ))}
+
+            <h3 className="font-semibold text-micro-dark pt-4">История платежей</h3>
+            {payments.length === 0 && <p className="text-sm text-gray-600">Платежей пока нет</p>}
+            {payments.map((p) => (
+              <Card key={p.id} className="rounded-lg border border-slate-200 bg-white">
+                <CardContent className="p-4 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-micro-light flex items-center justify-center">
-                      <Icon name="FileText" size={22} className="text-micro-green" />
+                    <div className="w-10 h-10 rounded-md bg-micro-gray flex items-center justify-center">
+                      <Icon name={p.kind === 'repay' ? 'CheckCircle' : 'CalendarPlus'} size={20} className="text-micro-blue" />
                     </div>
                     <div>
-                      <p className="font-semibold">Договор займа {loan.id}</p>
-                      <p className="text-sm text-gray-600">{loan.amount.toLocaleString()} ₽, до {new Date(loan.dueDate).toLocaleDateString('ru-RU')}</p>
+                      <p className="font-medium text-micro-dark">{p.note}</p>
+                      <p className="text-xs text-gray-500">{p.loan} · {p.date}</p>
                     </div>
                   </div>
-                  {loan.status === 'awaiting_sign' ? (
-                    <Button onClick={() => setActiveTab('overview')} className="rounded-md w-full sm:w-auto bg-micro-blue hover:bg-blue-800 text-white">
-                      <Icon name="FileSignature" size={16} className="mr-2" />
-                      Подписать
+                  <p className="font-semibold">{money(p.amount)}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </TabsContent>
+
+          <TabsContent value="applications" className="space-y-3">
+            {applications.length === 0 && <p className="text-center text-gray-600 py-8">Заявок пока нет</p>}
+            {applications.map((app) => (
+              <Card key={app.id} className="rounded-lg border border-slate-200 bg-white">
+                <CardContent className="p-4 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-micro-dark">{app.id} · {money(app.amount)}</p>
+                    <p className="text-sm text-gray-600">{app.statusText}</p>
+                    <p className="text-xs text-gray-500">{dateRu(app.date)}</p>
+                  </div>
+                  <Badge className={APP_STATUS[app.status]?.cls}>{APP_STATUS[app.status]?.label}</Badge>
+                </CardContent>
+              </Card>
+            ))}
+          </TabsContent>
+
+          <TabsContent value="contracts" className="space-y-3">
+            {loans.length === 0 && <p className="text-center text-gray-600 py-8">Договоров пока нет</p>}
+            {loans.map((loan) => (
+              <Card key={loan.id} className="rounded-lg border border-slate-200 bg-white">
+                <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-md bg-micro-gray flex items-center justify-center">
+                      <Icon name="FileText" size={22} className="text-micro-blue" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-micro-dark">Договор займа {loan.id}</p>
+                      <p className="text-sm text-gray-600">
+                        {money(loan.amount)} · {loan.status === 'awaiting_sign' ? 'ждёт подписи' : 'подписан'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    {loan.status === 'awaiting_sign' && (
+                      <Button onClick={() => setActiveTab('overview')} className="h-11 bg-micro-blue hover:bg-blue-800 text-white flex-1 sm:flex-none">
+                        Подписать
+                      </Button>
+                    )}
+                    <Button variant="outline" disabled={downloading === loan.id} onClick={() => downloadContract(loan)} className="h-11 flex-1 sm:flex-none">
+                      <Icon name="Download" size={16} className="mr-2" />
+                      {downloading === loan.id ? 'Готовим...' : 'Скачать PDF'}
                     </Button>
-                  ) : (
-                    <Badge className="bg-slate-500 text-white self-start sm:self-auto">Подписан</Badge>
-                  )}
+                  </div>
                 </CardContent>
               </Card>
             ))}
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">
-            <Card className="rounded-lg border border-slate-200 shadow-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Icon name="UserRound" size={20} className="mr-2 text-micro-blue" />
-                  Моя анкета
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+            <Card className="rounded-lg border border-slate-200 bg-white">
+              <CardContent className="p-4 sm:p-6 space-y-3">
                 {editing ? (
                   <>
-                    {[['fullName', 'ФИО'], ['email', 'Email'], ['birthDate', 'Дата рождения'], ['address', 'Адрес'], ['income', 'Доход'], ['employment', 'Занятость']].map(([key, label]) => (
+                    {PROFILE_FIELDS.map(([key, label]) => (
                       <div key={key} className="space-y-1">
                         <label className="text-sm text-gray-600">{label}</label>
                         <input
-                          className="w-full rounded-md border border-input px-3 py-2 text-base"
+                          className="w-full h-12 rounded-md border border-input px-3 text-base"
                           value={form[key] || ''}
                           onChange={(e) => setForm({ ...form, [key]: e.target.value })}
                         />
                       </div>
                     ))}
                     <div className="flex gap-3">
-                      <Button onClick={saveProfile} disabled={saving} className="flex-1 bg-micro-blue hover:bg-blue-800 rounded-md">
-                        Сохранить
-                      </Button>
-                      <Button variant="outline" onClick={() => setEditing(false)} className="flex-1 rounded-md">
-                        Отмена
-                      </Button>
+                      <Button onClick={saveProfile} disabled={saving} className="flex-1 h-12 bg-micro-blue hover:bg-blue-800 text-white">Сохранить</Button>
+                      <Button variant="outline" onClick={() => setEditing(false)} className="flex-1 h-12">Отмена</Button>
                     </div>
                   </>
                 ) : (
                   <>
-                    {[['Телефон', profile.phone ? '+7' + profile.phone : userPhone], ['ФИО', profile.fullName], ['Email', profile.email], ['Дата рождения', profile.birthDate], ['Паспорт', profile.passportSeries ? `${profile.passportSeries} ${profile.passportNumber}` : ''], ['Адрес', profile.address], ['Доход', profile.income], ['Занятость', profile.employment], ['Карта', profile.cardLast4 ? `•••• ${profile.cardLast4}` : '']].map(([label, value]) => (
-                      <div key={label} className="flex justify-between gap-4">
-                        <span className="text-gray-600">{label}</span>
-                        <span className="font-semibold text-right break-words">{value || '—'}</span>
+                    {[['Телефон', phoneText], ['ФИО', profile.fullName], ['Email', profile.email], ['Дата рождения', profile.birthDate], ['Паспорт', profile.passportSeries ? `${profile.passportSeries} ${profile.passportNumber}` : ''], ['Адрес', profile.address], ['Доход', profile.income], ['Занятость', profile.employment], ['Карта', profile.cardLast4 ? `•••• ${profile.cardLast4}` : '']].map(([label, value]) => (
+                      <div key={label} className="flex justify-between gap-4 py-1.5 border-b border-slate-100 last:border-0">
+                        <span className="text-gray-600 text-sm">{label}</span>
+                        <span className="font-medium text-right text-sm break-words">{value || '—'}</span>
                       </div>
                     ))}
-                    <div className="flex justify-between gap-4">
-                      <span className="text-gray-600">Документы</span>
-                      <Badge className={profile.docsVerified ? 'bg-micro-blue text-white' : 'bg-slate-500 text-white'}>
+                    <div className="flex justify-between gap-4 py-1.5">
+                      <span className="text-gray-600 text-sm">Документы</span>
+                      <Badge className={profile.docsVerified ? 'bg-emerald-600 text-white' : 'bg-slate-500 text-white'}>
                         {profile.docsVerified ? 'Проверены' : 'На проверке'}
                       </Badge>
                     </div>
-                    <Button onClick={startEdit} className="w-full bg-micro-blue hover:bg-blue-800 rounded-md">
+                    <Button onClick={startEdit} className="w-full h-12 bg-micro-blue hover:bg-blue-800 text-white">
                       <Icon name="Pencil" size={16} className="mr-2" />
                       Обновить анкету
                     </Button>

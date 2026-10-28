@@ -87,6 +87,8 @@ def handler(event: dict, context) -> dict:
         data['notes'] = [{'id': n[0], 'text': n[1], 'createdAt': str(n[2])[:16]} for n in cur.fetchall()]
         cur.execute(f"SELECT COUNT(*), COALESCE(SUM(amount), 0) FROM {SCHEMA}.loans WHERE client_id = {data['clientId']}")
         loans = cur.fetchone()
+        cur.execute(f"SELECT kind, url FROM {SCHEMA}.client_documents WHERE client_id = {data['clientId']}")
+        data['documents'] = {d[0]: d[1] for d in cur.fetchall()}
         data['loansCount'] = loans[0]
         data['loansSum'] = loans[1]
         return resp(200, data)
@@ -109,8 +111,11 @@ def handler(event: dict, context) -> dict:
         text = STATUS_TEXT[new_status]
         if new_status == 'rejected' and str(body.get('reason', '')).strip():
             text = 'Отклонена: ' + str(body['reason']).strip()
+        if new_status == 'rejected':
+            cur.execute(f"INSERT INTO {SCHEMA}.notifications (client_id, text) VALUES ({a[0]}, {esc(text)})")
         cur.execute(f"UPDATE {SCHEMA}.applications SET status = {esc(new_status)}, status_text = {esc(text)} WHERE id = {app_id}")
         if new_status == 'approved':
+            cur.execute(f"INSERT INTO {SCHEMA}.notifications (client_id, text) VALUES ({a[0]}, 'Заявка одобрена. Подпишите договор, чтобы получить деньги.')")
             amount, days = a[1], a[2]
             return_amount = round(amount * (1 + DAILY_RATE * days))
             cur.execute(f"""INSERT INTO {SCHEMA}.loans (client_id, application_id, amount, return_amount, days, status, due_date)

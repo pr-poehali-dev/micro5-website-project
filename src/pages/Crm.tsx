@@ -157,6 +157,24 @@ const Details = ({ id, onClose, onChanged }: { id: number; onClose: () => void; 
               <Row label="Выдано займов" value={`${d.loansCount} на ${Number(d.loansSum).toLocaleString()} ₽`} />
             </CardContent></Card>
 
+            <Card className="bg-white"><CardContent className="p-4 sm:p-6">
+              <h3 className="font-semibold text-micro-dark mb-3">Документы клиента</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {[['passport', 'Паспорт'], ['selfie', 'Селфи с паспортом']].map(([k, label]) => (
+                  <div key={k}>
+                    <p className="text-sm text-gray-600 mb-1">{label}</p>
+                    {d.documents?.[k] ? (
+                      <a href={d.documents[k]} target="_blank" rel="noreferrer">
+                        <img src={d.documents[k]} alt={label} className="w-full h-36 object-cover rounded-md border border-slate-200" />
+                      </a>
+                    ) : (
+                      <div className="h-36 rounded-md border border-dashed border-slate-300 flex items-center justify-center text-sm text-gray-500">Не загружено</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent></Card>
+
             <Card className="bg-white"><CardContent className="p-4 sm:p-6 space-y-3">
               <h3 className="font-semibold text-micro-dark">Заметки сотрудников</h3>
               <div className="flex gap-2">
