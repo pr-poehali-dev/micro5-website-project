@@ -14,7 +14,7 @@ CORS = {
 STATUS_TEXT = {
     'new': 'Принята, ожидает рассмотрения',
     'in_work': 'Взята в работу',
-    'approved': 'Одобрена, займ выдан',
+    'approved': 'Одобрена, ожидает подписания договора',
     'rejected': 'Отклонена',
 }
 DAILY_RATE = 0.0008
@@ -114,7 +114,7 @@ def handler(event: dict, context) -> dict:
             amount, days = a[1], a[2]
             return_amount = round(amount * (1 + DAILY_RATE * days))
             cur.execute(f"""INSERT INTO {SCHEMA}.loans (client_id, application_id, amount, return_amount, days, status, due_date)
-                VALUES ({a[0]}, {app_id}, {amount}, {return_amount}, {days}, 'active', CURRENT_DATE + {int(days)})""")
+                VALUES ({a[0]}, {app_id}, {amount}, {return_amount}, {days}, 'awaiting_sign', CURRENT_DATE + {int(days)})""")
             cur.execute(f"UPDATE {SCHEMA}.clients SET docs_verified = TRUE WHERE id = {a[0]}")
         return resp(200, {'success': True, 'status': new_status})
 

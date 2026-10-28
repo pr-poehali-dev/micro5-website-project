@@ -6,13 +6,16 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
+import LoanSteps from '@/components/LoanSteps';
 
 interface LoanData {
   id: string;
+  dbId: number;
+  days: number;
   amount: number;
   returnAmount: number;
   dueDate: string;
-  status: 'active' | 'overdue' | 'paid';
+  status: 'active' | 'overdue' | 'paid' | 'awaiting_sign' | 'signed';
   daysLeft: number;
 }
 
@@ -39,6 +42,13 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+
+  const reload = () =>
+    callCabinet({ action: 'me' }).then((d) => {
+      setLoans(d.loans);
+      setApplications(d.applications);
+      setProfile(d.profile);
+    });
 
   useEffect(() => {
     callCabinet({ action: 'me' })
@@ -82,6 +92,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
       case 'active': return 'bg-micro-blue text-white';
       case 'overdue': return 'bg-red-500 text-white';
       case 'paid': return 'bg-slate-500 text-white';
+      case 'awaiting_sign': return 'bg-amber-500 text-white';
+      case 'signed': return 'bg-amber-500 text-white';
       case 'pending': return 'bg-yellow-500 text-white';
       case 'approved': return 'bg-micro-blue text-white';
       case 'rejected': return 'bg-red-500 text-white';
@@ -104,6 +116,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
   };
 
   const activeLoan = loans.find(loan => loan.status === 'active');
+  const pendingLoans = loans.filter(loan => loan.status === 'awaiting_sign' || loan.status === 'signed');
   const totalBorrowed = loans.reduce((sum, loan) => sum + loan.amount, 0);
   const totalPaid = loans.filter(loan => loan.status === 'paid').reduce((sum, loan) => sum + loan.returnAmount, 0);
 
@@ -172,6 +185,9 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
 
           {/* Обзор */}
           <TabsContent value="overview" className="space-y-6">
+            {pendingLoans.map((loan) => (
+              <LoanSteps key={loan.id} loan={loan} fullName={profile.fullName || ''} onChanged={reload} />
+            ))}
             <div className="grid md:grid-cols-3 gap-4 sm:gap-4 sm:p-6">
               <Card className="bg-micro-blue text-white rounded-lg border border-slate-200">
                 <CardContent className="p-4 sm:p-6">
@@ -305,7 +321,9 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                       <Badge className={getStatusColor(loan.status)}>
                         <Icon name={getStatusIcon(loan.status) as any} size={14} className="mr-1" />
                         {loan.status === 'active' ? 'Активный' : 
-                         loan.status === 'paid' ? 'Погашен' : 'Просрочен'}
+                         loan.status === 'paid' ? 'Погашен' :
+                         loan.status === 'awaiting_sign' ? 'Ждёт подписи' :
+                         loan.status === 'signed' ? 'Ждёт выплаты' : 'Просрочен'}
                       </Badge>
                     </div>
 
@@ -407,10 +425,14 @@ const Dashboard: React.FC<DashboardProps> = ({ userPhone, onLogout }) => {
                       <p className="text-sm text-gray-600">{loan.amount.toLocaleString()} ₽, до {new Date(loan.dueDate).toLocaleDateString('ru-RU')}</p>
                     </div>
                   </div>
-                  <Button variant="outline" className="rounded-md w-full sm:w-auto">
-                    <Icon name="Download" size={16} className="mr-2" />
-                    Скачать
-                  </Button>
+                  {loan.status === 'awaiting_sign' ? (
+                    <Button onClick={() => setActiveTab('overview')} className="rounded-md w-full sm:w-auto bg-micro-blue hover:bg-blue-800 text-white">
+                      <Icon name="FileSignature" size={16} className="mr-2" />
+                      Подписать
+                    </Button>
+                  ) : (
+                    <Badge className="bg-slate-500 text-white self-start sm:self-auto">Подписан</Badge>
+                  )}
                 </CardContent>
               </Card>
             ))}

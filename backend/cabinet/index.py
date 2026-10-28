@@ -100,8 +100,24 @@ def handler(event: dict, context) -> dict:
             cur.execute(f"UPDATE {SCHEMA}.clients SET {', '.join(sets)}, updated_at = NOW() WHERE id = {cid}")
         return resp(200, {'profile': profile(cur, cid)})
 
-    cur.execute(f"SELECT id, amount, return_amount, due_date, status, issued_at, days, GREATEST((due_date - CURRENT_DATE), 0) FROM {SCHEMA}.loans WHERE client_id = {cid} ORDER BY id DESC")
-    loans = [{'id': f'LOAN-{r[0]:03d}', 'amount': r[1], 'returnAmount': r[2], 'dueDate': str(r[3]), 'status': r[4], 'issuedAt': str(r[5]), 'days': r[6], 'daysLeft': r[7]} for r in cur.fetchall()]
+    if action in ('sign', 'payout'):
+        loan_id = int(body.get('loanId') or 0)
+        cur.execute(f"SELECT status, days FROM {SCHEMA}.loans WHERE id = {loan_id} AND client_id = {cid}")
+        row = cur.fetchone()
+        if not row:
+            return resp(404, {'error': 'Займ не найден'})
+        if action == 'sign':
+            if row[0] != 'awaiting_sign':
+                return resp(400, {'error': 'Договор уже подписан'})
+            cur.execute(f"UPDATE {SCHEMA}.loans SET status = 'signed', signed_at = NOW() WHERE id = {loan_id}")
+        else:
+            if row[0] != 'signed':
+                return resp(400, {'error': 'Сначала подпишите договор'})
+            cur.execute(f"UPDATE {SCHEMA}.loans SET status = 'active', paid_out_at = NOW(), issued_at = CURRENT_DATE, due_date = CURRENT_DATE + {int(row[1])} WHERE id = {loan_id}")
+        return resp(200, {'success': True})
+
+    cur.execute(f"SELECT id, amount, return_amount, due_date, status, issued_at, days, GREATEST((due_date - CURRENT_DATE), 0), signed_at, paid_out_at FROM {SCHEMA}.loans WHERE client_id = {cid} ORDER BY id DESC")
+    loans = [{'id': f'LOAN-{r[0]:03d}', 'dbId': r[0], 'amount': r[1], 'returnAmount': r[2], 'dueDate': str(r[3]), 'status': r[4], 'issuedAt': str(r[5]), 'days': r[6], 'daysLeft': r[7] if r[4] != 'awaiting_sign' and r[4] != 'signed' else r[6], 'signedAt': str(r[8])[:16] if r[8] else '', 'paidOutAt': str(r[9])[:16] if r[9] else ''} for r in cur.fetchall()]
     cur.execute(f"SELECT id, amount, created_at, status, status_text FROM {SCHEMA}.applications WHERE client_id = {cid} ORDER BY id DESC")
     apps = [{'id': f'APP-{r[0]:03d}', 'amount': r[1], 'date': str(r[2])[:10], 'status': r[3], 'statusText': r[4]} for r in cur.fetchall()]
     return resp(200, {'profile': profile(cur, cid), 'loans': loans, 'applications': apps})
