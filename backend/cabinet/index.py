@@ -332,22 +332,33 @@ def handler(event: dict, context) -> dict:
             cur.execute(f"UPDATE {SCHEMA}.clients SET {', '.join(sets)}, updated_at = NOW() WHERE id = {cid}")
         return resp(200, {'profile': profile(cur, cid)})
 
-    if action in ('sign', 'payout'):
+    if action == 'sign_code':
         loan_id = int(body.get('loanId') or 0)
-        cur.execute(f"SELECT status, days, amount FROM {SCHEMA}.loans WHERE id = {loan_id} AND client_id = {cid}")
+        cur.execute(f"SELECT status FROM {SCHEMA}.loans WHERE id = {loan_id} AND client_id = {cid}")
+        row = cur.fetchone()
+        if not row or row[0] != 'awaiting_sign':
+            return resp(400, {'error': 'Договор сейчас нельзя подписать'})
+        code = ''.join(secrets.choice('0123456789') for _ in range(6))
+        cur.execute(f"INSERT INTO {SCHEMA}.sign_codes (client_id, loan_id, code) VALUES ({cid}, {loan_id}, {esc(code)})")
+        notify(cur, cid, f"Код подписи договора: {code}. Никому его не сообщайте.")
+        return resp(200, {'code': code})
+
+    if action == 'sign':
+        loan_id = int(body.get('loanId') or 0)
+        entered = str(body.get('code', '')).strip()
+        cur.execute(f"SELECT status FROM {SCHEMA}.loans WHERE id = {loan_id} AND client_id = {cid}")
         row = cur.fetchone()
         if not row:
             return resp(404, {'error': 'Займ не найден'})
-        if action == 'sign':
-            if row[0] != 'awaiting_sign':
-                return resp(400, {'error': 'Договор уже подписан'})
-            cur.execute(f"UPDATE {SCHEMA}.loans SET status = 'signed', signed_at = NOW() WHERE id = {loan_id}")
-            notify(cur, cid, 'Договор подписан. Теперь можно получить деньги на карту.')
-        else:
-            if row[0] != 'signed':
-                return resp(400, {'error': 'Сначала подпишите договор'})
-            cur.execute(f"UPDATE {SCHEMA}.loans SET status = 'active', paid_out_at = NOW(), issued_at = CURRENT_DATE, due_date = CURRENT_DATE + {int(row[1])} WHERE id = {loan_id}")
-            notify(cur, cid, f"Займ {row[2]:,} ₽ выдан. Срок возврата {row[1]} дн.".replace(',', ' '))
+        if row[0] != 'awaiting_sign':
+            return resp(400, {'error': 'Договор уже подписан'})
+        cur.execute(f"SELECT code FROM {SCHEMA}.sign_codes WHERE loan_id = {loan_id} AND client_id = {cid} AND created_at > NOW() - INTERVAL '10 minutes' ORDER BY id DESC LIMIT 1")
+        c = cur.fetchone()
+        if not c or not entered or c[0] != entered:
+            return resp(400, {'error': 'Неверный код подписи. Запросите новый код.'})
+        cur.execute(f"UPDATE {SCHEMA}.loans SET status = 'signed', signed_at = NOW() WHERE id = {loan_id}")
+        cur.execute(f"DELETE FROM {SCHEMA}.sign_codes WHERE loan_id = {loan_id}")
+        notify(cur, cid, 'Договор подписан и отправлен на проверку. Обычно это занимает несколько минут.')
         return resp(200, {'success': True})
 
     if action in ('repay', 'extend'):

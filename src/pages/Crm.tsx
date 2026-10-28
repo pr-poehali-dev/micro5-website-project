@@ -149,6 +149,11 @@ const Details = ({ id, onClose, onChanged }: { id: number; onClose: () => void; 
     if (reason !== null) act('video_review', { decision: 'rejected', reason });
   };
 
+  const rejectContract = () => {
+    const reason = prompt('Почему договор возвращается на подпись?');
+    if (reason !== null) act('confirm_contract', { decision: 'reject', reason });
+  };
+
   const needInfo = () => {
     const reason = prompt('Что нужно уточнить у клиента?');
     if (reason !== null) act('need_docs', { reason });
@@ -243,6 +248,20 @@ const Details = ({ id, onClose, onChanged }: { id: number; onClose: () => void; 
                 {d.dataConfirm === 'none' ? 'Попросить подтвердить данные' : 'Запросить подтверждение ещё раз'}
               </Button>
             </CardContent></Card>
+
+            {d.loan && d.loan.status === 'signed' && (
+              <Card className="bg-white ring-2 ring-amber-400"><CardContent className="p-4 sm:p-6 space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="font-semibold text-micro-dark">Проверка договора</h3>
+                  <Badge className="bg-amber-500 text-white">Ждёт проверки</Badge>
+                </div>
+                <p className="text-sm text-gray-600">Клиент подписал договор на {d.loan.amount.toLocaleString()} ₽ ({d.loan.signedAt}). После подтверждения займ станет активным.</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button disabled={busy} onClick={rejectContract} className="h-11 bg-micro-green hover:bg-red-700 text-white">Вернуть на подпись</Button>
+                  <Button disabled={busy} onClick={() => act('confirm_contract', { decision: 'approve' })} className="h-11 bg-emerald-600 hover:bg-emerald-700 text-white">Подтвердить</Button>
+                </div>
+              </CardContent></Card>
+            )}
 
             <Card className="bg-white"><CardContent className="p-4 sm:p-6 space-y-3">
               <div className="flex items-center justify-between gap-3">

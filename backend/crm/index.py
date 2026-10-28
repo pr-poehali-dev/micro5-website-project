@@ -99,6 +99,9 @@ def handler(event: dict, context) -> dict:
         data['video'] = {'id': v[0], 'url': v[1], 'autoOk': v[2], 'autoIssues': v[3], 'status': v[4], 'reason': v[5], 'createdAt': str(v[6])[:16], 'code': v[7]} if v else None
         cur.execute(f"SELECT id, result, comment, created_at FROM {SCHEMA}.call_log WHERE application_id = {app_id} ORDER BY id DESC")
         data['calls'] = [{'id': c[0], 'result': c[1], 'comment': c[2], 'createdAt': str(c[3])[:16]} for c in cur.fetchall()]
+        cur.execute(f"SELECT id, status, amount, return_amount, days, signed_at FROM {SCHEMA}.loans WHERE application_id = {app_id} ORDER BY id DESC LIMIT 1")
+        ln = cur.fetchone()
+        data['loan'] = {'id': ln[0], 'status': ln[1], 'amount': ln[2], 'returnAmount': ln[3], 'days': ln[4], 'signedAt': str(ln[5])[:16] if ln[5] else ''} if ln else None
         data['loansCount'] = loans[0]
         data['loansSum'] = loans[1]
         return resp(200, data)
@@ -108,6 +111,20 @@ def handler(event: dict, context) -> dict:
         if not text:
             return resp(400, {'error': 'Пустая заметка'})
         cur.execute(f"INSERT INTO {SCHEMA}.application_notes (application_id, text) VALUES ({app_id}, {esc(text)})")
+        return resp(200, {'success': True})
+
+    if action == 'confirm_contract':
+        cur.execute(f"SELECT id, client_id, days, amount FROM {SCHEMA}.loans WHERE application_id = {app_id} AND status = 'signed' ORDER BY id DESC LIMIT 1")
+        ln = cur.fetchone()
+        if not ln:
+            return resp(400, {'error': 'Нет подписанного договора на проверке'})
+        if body.get('decision') == 'reject':
+            cur.execute(f"UPDATE {SCHEMA}.loans SET status = 'awaiting_sign', signed_at = NULL WHERE id = {ln[0]}")
+            reason = str(body.get('reason', '')).strip()
+            cur.execute(f"INSERT INTO {SCHEMA}.notifications (client_id, text) VALUES ({ln[1]}, {esc('Договор не прошёл проверку, подпишите его заново.' + (' Причина: ' + reason if reason else ''))})")
+            return resp(200, {'success': True})
+        cur.execute(f"UPDATE {SCHEMA}.loans SET status = 'active', paid_out_at = NOW(), issued_at = CURRENT_DATE, due_date = CURRENT_DATE + {int(ln[2])} WHERE id = {ln[0]}")
+        cur.execute(f"INSERT INTO {SCHEMA}.notifications (client_id, text) VALUES ({ln[1]}, {esc(f'Договор проверен. Займ {ln[3]:,} ₽ активен, деньги отправлены на карту.'.replace(',', ' '))})")
         return resp(200, {'success': True})
 
     if action == 'video_review':
